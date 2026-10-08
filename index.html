@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIREVA — Input Nilai Siswa</title>
+<style>
+  :root {
+    --primary: #10b981;
+    --primary-dark: #059669;
+    --bg: #f8faf9;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    --danger: #fee2e2;
+    --danger-t: #991b1b;
+    --warning: #fef9c3;
+    --warning-t: #854d0e;
+    --success: #dcfce7;
+    --success-t: #166534;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Roboto, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text);
+    display: flex; flex-direction: column; min-height: 100vh;
+  }
+  header {
+    position: sticky; top: 0; z-index: 30;
+    background: rgba(255,255,255,.95); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .logo { width: 40px; height: 40px; background: #fff; border-radius: 10px;
+          box-shadow: 0 1px 3px rgba(0,0,0,.1); display: flex; align-items: center; justify-content: center;
+          border: 1px solid var(--border); }
+  .logo svg { width: 28px; height: 28px; }
+  .brand h1 { font-size: 18px; font-weight: 800; letter-spacing: -.02em; }
+  .brand p { font-size: 11px; color: var(--muted); }
+  .info { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .badge { background: #f1f5f9; border: 1px solid var(--border); padding: 4px 10px;
+           border-radius: 999px; font-size: 12px; font-weight: 500; }
+  .badge.primary { background: #ecfdf5; color: var(--primary-dark); border-color: #a7f3d0; }
+  select.kelas { padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px;
+                 font-size: 13px; font-weight: 600; background: #fff; }
+  main { flex: 1; max-width: 1200px; margin: 0 auto; width: 100%; padding: 16px; }
+  .tabs { display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 10px;
+          max-width: 480px; margin: 0 auto 16px; }
+  .tab { flex: 1; padding: 8px 12px; border: none; background: transparent; cursor: pointer;
+         border-radius: 7px; font-size: 13px; font-weight: 600; color: var(--muted);
+         display: flex; align-items: center; justify-content: center; gap: 6px; transition: .15s; }
+  .tab.active { background: #fff; color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+  .tab:disabled { opacity: .4; cursor: not-allowed; }
+  .sheet-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .sheet-tabs { display: flex; gap: 2px; background: #f1f5f9; padding: 3px; border-radius: 8px; }
+  .sheet-tab { padding: 6px 12px; border: none; background: transparent; cursor: pointer;
+               border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .sheet-tab.active { background: var(--primary); color: #fff; }
+  .btn { padding: 7px 14px; border: 1px solid var(--border); background: #fff; border-radius: 8px;
+         font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .btn:hover { background: #f8fafc; }
+  .btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .btn.primary:hover { background: var(--primary-dark); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .info-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px;
+              font-size: 12px; color: #92400e; margin-bottom: 12px; }
+  .info-box b { color: #78350f; }
+  .legend { display: flex; gap: 10px; font-size: 11px; color: var(--muted); flex-wrap: wrap; margin-bottom: 8px; }
+  .legend span { display: inline-flex; align-items: center; gap: 4px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+  table { border-collapse: collapse; min-width: 900px; }
+  th, td { border: 1px solid var(--border); padding: 4px; text-align: center; font-size: 13px; }
+  th { background: #f8fafc; font-weight: 700; position: sticky; top: 0; z-index: 1; }
+  th.grp { color: var(--primary-dark); }
+  td.sticky, th.sticky { position: sticky; left: 0; background: #fff; z-index: 2; }
+  th.sticky { background: #f1f5f9; }
+  .cell { display: inline-block; width: 100%; min-width: 38px; padding: 4px 2px; border-radius: 4px;
+          font-size: 13px; border: 1px solid transparent; cursor: pointer; }
+  .cell:hover { border-color: var(--border); }
+  .cell input { width: 42px; text-align: center; border: 1px solid var(--primary); border-radius: 4px;
+                padding: 2px; font-size: 13px; }
+  .danger { background: var(--danger); color: var(--danger-t); font-weight: 600; }
+  .warning { background: var(--warning); color: var(--warning-t); font-weight: 600; }
+  .success { background: var(--success); color: var(--success-t); font-weight: 600; }
+  .hasil { background: #f0fdfa; font-weight: 700; }
+  .hasil.tuntas { color: var(--primary-dark); }
+  .hasil.belum { color: #dc2626; }
+  .empty-state { text-align: center; padding: 48px 16px; color: var(--muted); }
+  .empty-state svg { width: 56px; height: 56px; margin-bottom: 12px; opacity: .4; }
+  /* Mobile input */
+  .mobile-form { display: none; background: #fff; border: 1px solid var(--border); border-radius: 10px;
+                  padding: 14px; margin-bottom: 12px; }
+  .mobile-form h3 { font-size: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .mobile-form label { font-size: 11px; font-weight: 600; color: var(--muted); display: block; margin: 8px 0 3px; }
+  .mobile-form select, .mobile-form input { width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+          border-radius: 8px; font-size: 14px; }
+  .mobile-form .val-input { display: flex; gap: 8px; }
+  .mobile-form .val-input input { text-align: center; font-size: 18px; font-weight: 700; }
+  @media (max-width: 768px) {
+    .mobile-form { display: block; }
+    .table-wrap { display: none; }
+    .legend.hide-mobile { display: none; }
+  }
+  footer { margin-top: auto; border-top: 1px solid var(--border); background: #f8fafc; }
+  footer button { width: 100%; max-width: 1200px; margin: 0 auto; display: block; padding: 12px 16px;
+                  background: transparent; border: none; cursor: pointer; text-align: left;
+                  font-size: 11px; color: var(--muted); }
+  footer button:hover { background: #f1f5f9; }
+  footer .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none;
+                   align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 16px; padding: 24px; max-width: 420px; width: 100%;
+           text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,.2); }
+  .modal .logo-big { width: 72px; height: 72px; margin: 0 auto 12px; }
+  .modal h2 { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+  .modal p.sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .modal .info-row { display: flex; justify-content: space-between; align-items: center;
+                     background: #f8fafc; border: 1px solid var(--border); border-radius: 8px;
+                     padding: 8px 12px; margin-bottom: 8px; font-size: 14px; }
+  .modal .info-row .lbl { display: flex; align-items: center; gap: 8px; color: var(--muted); font-weight: 500; }
+  .modal .note { background: #ecfdf5; color: #166534; font-size: 11px; padding: 8px;
+                 border-radius: 6px; margin: 12px 0; }
+  .modal .close-btn { width: 100%; background: var(--primary); color: #fff; border: none;
+                      padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 4px; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+           background: #0f172a; color: #fff; padding: 10px 18px; border-radius: 8px;
+           font-size: 13px; z-index: 200; opacity: 0; transition: .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  .toast.err { background: #dc2626; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #fff;
+             border-top-color: transparent; border-radius: 50%; animation: spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading { text-align: center; padding: 40px; color: var(--muted); }
+  /* Bar link GAS paling atas */
+  .gas-bar { background: linear-gradient(90deg, #ecfdf5 0%, #f0fdfa 100%);
+             border-bottom: 1px solid #a7f3d0; padding: 8px 16px;
+             display: flex; align-items: center; justify-content: space-between;
+             gap: 10px; flex-wrap: wrap; font-size: 12px; }
+  .gas-bar .gas-left { display: flex; align-items: center; gap: 8px; color: var(--primary-dark); font-weight: 600; }
+  .gas-bar .gas-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .gas-bar a.link { display: inline-flex; align-items: center; gap: 4px;
+                    padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
+                    background: #fff; border: 1px solid var(--border); color: var(--primary-dark);
+                    text-decoration: none; transition: .15s; }
+  .gas-bar a.link:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .gas-bar .id-mono { font-family: 'Courier New', monospace; font-size: 10px;
+                      background: #fff; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border);
+                      color: var(--muted); user-select: all; }
+</style>
+</head>
+<body>
+
+<!-- ===== BAR LINK GOOGLE APPS SCRIPT (paling atas) ===== -->
+<div class="gas-bar">
+  <div class="gas-left">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+    GAS SIREVA
+    <span class="id-mono">ID: 1nvPmogHu2Yo0KynPjcfRAsKEZcrQlJr3VhXbZb4LLW4</span>
+  </div>
+  <div class="gas-links">
+    <a class="link" href="https://script.google.com/macros/s/AKfycbwZSaGFSEMgNXyj8ma7H8s6eQnhO48qtZ37jsSw6xAFWPowJ2fughB2RlS_1cslnLwl/exec" target="_blank" rel="noopener">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+      Editor Apps Script
+    </a>
+    <a class="link" href="https://docs.google.com/spreadsheets/d/1nvPmogHu2Yo0KynPjcfRAsKEZcrQlJr3VhXbZb4LLW4/edit" target="_blank" rel="noopener">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+      Buka Spreadsheet
+    </a>
+    <a class="link" href="https://script.google.com/macros/s/AKfycbwZSaGFSEMgNXyj8ma7H8s6eQnhO48qtZ37jsSw6xAFWPowJ2fughB2RlS_1cslnLwl/exec" target="_blank" rel="noopener" id="deployLink" title="Setelah deploy, ganti link ini dengan URL Web App">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+      URL Web App
+    </a>
+  </div>
+</div>
+
+<header>
+  <div class="brand">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+      </svg>
+    </div>
+    <div>
+      <h1>SIREVA</h1>
+      <p>Sistem Input & Remedial Nilai</p>
+    </div>
+  </div>
+  <div class="info">
+    <span class="badge primary" id="mapelBadge">INFORMATIKA</span>
+    <span class="badge" id="tahunBadge">2025/2026</span>
+    <span class="badge" id="userBadge">Guru</span>
+  </div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="input" onclick="switchTab('input')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+      Input Nilai
+    </button>
+    <button class="tab" data-tab="rekap" onclick="switchTab('rekap')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 16l4-4 4 4 5-5"/></svg>
+      Rekap
+    </button>
+  </div>
+
+  <div id="view-input">
+    <div class="sheet-bar">
+      <div class="sheet-tabs">
+        <button class="sheet-tab active" data-sheet="awal" onclick="switchSheet('awal')">Nilai Awal</button>
+        <button class="sheet-tab" data-sheet="remidi" onclick="switchSheet('remidi')">Nilai Remidi</button>
+        <button class="sheet-tab" data-sheet="akhir" onclick="switchSheet('akhir')">Nilai Akhir</button>
+      </div>
+      <button class="btn primary" id="copyBtn" onclick="ambilDari()" style="display:none">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        <span id="copyLabel">Ambil</span>
+      </button>
+    </div>
+
+    <div class="info-box" id="akhirInfo" style="display:none">
+      <b>Rumus Nilai Akhir (KKTP = <span id="kktpVal">78</span>):</b><br>
+      • Nilai awal ≥ KKTP → akhir = nilai awal (sudah tuntas)<br>
+      • Awal &lt; KKTP &amp; remidi = 100 → akhir = 84<br>
+      • Awal &lt; KKTP &amp; remidi 91–99 → akhir = 80<br>
+      • Awal &lt; KKTP &amp; remidi = 80 → akhir = 79<br>
+      • Awal &lt; KKTP &amp; remidi lainnya (&lt; 95) → akhir = 82
+    </div>
+
+    <!-- Mobile form -->
+    <div class="mobile-form">
+      <h3>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        Input Cepat (Mobile)
+      </h3>
+      <label>Nama Siswa</label>
+      <select id="mStudent"></select>
+      <label>Kolom Nilai</label>
+      <select id="mField"></select>
+      <label>Nilai (0–100)</label>
+      <div class="val-input">
+        <input type="number" id="mValue" min="0" max="100" placeholder="cth. 85">
+        <button class="btn primary" onclick="simpanMobile()">Simpan</button>
+      </div>
+    </div>
+
+    <div class="legend hide-mobile" id="legend">
+      <span><span class="dot" style="background:#ef4444"></span> &lt; KKTP (merah)</span>
+      <span><span class="dot" style="background:#eab308"></span> = KKTP (kuning)</span>
+      <span><span class="dot" style="background:#22c55e"></span> &gt; KKTP (hijau)</span>
+    </div>
+
+    <div id="tabelContainer"></div>
+  </div>
+
+  <div id="view-rekap" style="display:none">
+    <div class="sheet-bar">
+      <button class="btn" onclick="loadRekap()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        Refresh
+      </button>
+      <button class="btn" onclick="window.print()">Cetak</button>
+      <span class="badge primary" id="rekapSheetBadge">Nilai Awal</span>
+    </div>
+    <div id="rekapStats" class="legend"></div>
+    <div id="rekapTable"></div>
+  </div>
+</main>
+
+<footer>
+  <button onclick="showAbout()">
+    <div class="row">
+      <span><b>SIREVA</b> — Sistem Input & Remedial Nilai Siswa</span>
+      <span>KKTP: <b id="footerKktp">78</b> • <span id="footerSiswa">0</span> siswa • Tentang ⓘ</span>
+    </div>
+  </button>
+</footer>
+
+<!-- About Modal -->
+<div class="modal-overlay" id="aboutModal" onclick="if(event.target===this)closeAbout()">
+  <div class="modal">
+    <div class="logo-big">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" width="72" height="72">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+      </svg>
+    </div>
+    <h2>SIREVA</h2>
+    <p class="sub">Sistem Input & Remedial Nilai Siswa</p>
+    <div class="info-row">
+      <span class="lbl">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+        Pengembang
+      </span>
+      <b>MB</b>
+    </div>
+    <div class="info-row">
+      <span class="lbl">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Build
+      </span>
+      <b>8 Oktober 2026</b>
+    </div>
+    <div class="info-row">
+      <span class="lbl">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg>
+        Kontak
+      </span>
+      <a href="mailto:yanuar.b@gmail.com" style="color:var(--primary);font-weight:600;text-decoration:none">yanuar.b@gmail.com</a>
+    </div>
+    <div class="note">Dibuat untuk memudahkan guru mengelola nilai siswa.</div>
+    <button class="close-btn" onclick="closeAbout()">Tutup</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ STATE ============
+var state = {
+  activeTab: 'input',
+  activeSheet: 'awal',
+  info: null,
+  siswa: [],
+  nilai: {},   // { awal: [...], remidi: [...], akhir: [...] }
+  kktp: 78,
+  kkm: 75,
+  bobot: { lm: 0.4, sts: 0.3, sas: 0.3 },
+  mStudent: '',
+  mField: 'lm1Tp1'
+};
+
+var SHEETS = {
+  awal: { label: 'Nilai Awal', sheetName: 'Nilai Awal', fromLabel: '', fromSheet: null, editable: true },
+  remidi: { label: 'Nilai Remidi', sheetName: 'Nilai Remidi', fromLabel: 'Ambil dari Nilai Awal', fromSheet: 'Nilai Awal', editable: true },
+  akhir: { label: 'Nilai Akhir', sheetName: 'Nilai Akhir', fromLabel: 'Ambil dari Nilai Remidi', fromSheet: 'Nilai Remidi', editable: false }
+};
+
+var FIELDS = [
+  ['lm1Tp1','TP1'],['lm1Tp2','TP2'],['lm1Tp3','TP3'],['lm1Tp4','TP4'],
+  ['lm2Tp1','TP1'],['lm2Tp2','TP2'],['lm2Tp3','TP3'],['lm2Tp4','TP4'],
+  ['lm3Tp1','TP1'],['lm3Tp2','TP2'],['lm3Tp3','TP3'],['lm3Tp4','TP4'],
+  ['lm4Tp1','TP1'],['lm4Tp2','TP2'],['lm4Tp3','TP3'],['lm4Tp4','TP4'],
+  ['lm5Tp1','TP1'],['lm5Tp2','TP2'],['lm5Tp3','TP3'],['lm5Tp4','TP4'],
+  ['lm1Sumatif','LM1'],['lm2Sumatif','LM2'],['lm3Sumatif','LM3'],['lm4Sumatif','LM4'],['lm5Sumatif','LM5'],
+  ['sts','STS'],['sas','SAS']
+];
+
+// ============ INIT ============
+function init() {
+  google.script.run.withSuccessHandler(function (info) {
+    state.info = info;
+    state.kktp = info.kktp || 78;
+    state.kkm = info.kkm || 75;
+    var parts = String(info.bobot || '0.4 / 0.3 / 0.3').split('/').map(function(s){return parseFloat(s.trim());});
+    if (parts.length === 3) { state.bobot = { lm: parts[0], sts: parts[1], sas: parts[2] }; }
+    document.getElementById('mapelBadge').textContent = info.mataPelajaran || 'INFORMATIKA';
+    document.getElementById('tahunBadge').textContent = info.tahunAjaran || '2025/2026';
+    document.getElementById('footerKktp').textContent = state.kktp;
+    document.getElementById('kktpVal').textContent = state.kktp;
+    loadSiswa();
+  }).getInfoKelas();
+}
+
+function loadSiswa() {
+  google.script.run.withSuccessHandler(function (siswa) {
+    state.siswa = siswa;
+    document.getElementById('footerSiswa').textContent = siswa.length;
+    populateMobileSelects();
+    loadNilai();
+  }).getSiswa();
+}
+
+function populateMobileSelects() {
+  var sel = document.getElementById('mStudent');
+  sel.innerHTML = state.siswa.map(function(s){return '<option value="'+s.no+'">'+s.no+'. '+s.nama+'</option>';}).join('');
+  var fsel = document.getElementById('mField');
+  fsel.innerHTML = FIELDS.map(function(f){return '<option value="'+f[0]+'">'+f[1]+'</option>';}).join('');
+  if (state.siswa.length) state.mStudent = state.siswa[0].no;
+  sel.value = state.mStudent;
+  fsel.value = state.mField;
+}
+
+function loadNilai() {
+  var sheetName = SHEETS[state.activeSheet].sheetName;
+  google.script.run.withSuccessHandler(function (data) {
+    state.nilai[state.activeSheet] = data;
+    renderTabel();
+    updateCopyButton();
+  }).getNilai(sheetName);
+}
+
+// ============ TAB ============
+function switchTab(t) {
+  state.activeTab = t;
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('active', b.dataset.tab===t);});
+  document.getElementById('view-input').style.display = t==='input'?'':'none';
+  document.getElementById('view-rekap').style.display = t==='rekap'?'':'none';
+  if (t === 'rekap') loadRekap();
+}
+
+// ============ SHEET ============
+function switchSheet(s) {
+  state.activeSheet = s;
+  document.querySelectorAll('.sheet-tab').forEach(function(b){b.classList.toggle('active', b.dataset.sheet===s);});
+  document.getElementById('rekapSheetBadge').textContent = SHEETS[s].label;
+  document.getElementById('akhirInfo').style.display = s==='akhir'?'':'none';
+  document.getElementById('legend').style.display = s==='awal'?'none':'';
+  if (!state.nilai[s]) loadNilai(); else { renderTabel(); updateCopyButton(); }
+}
+
+function updateCopyButton() {
+  var meta = SHEETS[state.activeSheet];
+  var btn = document.getElementById('copyBtn');
+  if (meta.fromSheet) {
+    btn.style.display = '';
+    document.getElementById('copyLabel').textContent = meta.fromLabel;
+  } else { btn.style.display = 'none'; }
+}
+
+function ambilDari() {
+  var meta = SHEETS[state.activeSheet];
+  if (!meta.fromSheet) return;
+  if (!confirm('Ambil data dari '+meta.fromSheet+' ke '+meta.label+'? Data '+meta.label+' saat ini akan ditimpa.')) return;
+  var btn = document.getElementById('copyBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Memproses...';
+  google.script.run.withSuccessHandler(function (res) {
+    btn.disabled = false; updateCopyButton();
+    if (res.success) {
+      toast(meta.label+' diperbarui ('+res.updated+' siswa)');
+      loadNilai();
+    } else toast(res.error || 'Gagal', true);
+  }).withFailureHandler(function(err){
+    btn.disabled = false; updateCopyButton();
+    toast('Gagal: '+err.message, true);
+  }).ambilDari(meta.sheetName, meta.fromSheet);
+}
+
+// ============ RENDER TABEL ============
+function renderTabel() {
+  var container = document.getElementById('tabelContainer');
+  var data = state.nilai[state.activeSheet] || [];
+  if (state.siswa.length === 0) {
+    container.innerHTML = '<div class="empty-state">'+
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>'+
+      '<p>Belum ada siswa. Tambahkan via script setupSheets() atau edit sheet Data Siswa.</p></div>';
+    return;
+  }
+  var sheet = state.activeSheet;
+  var editable = SHEETS[sheet].editable;
+  var showHasil = true; // semua sheet tampilkan kolom hasil
+
+  var html = '<div class="table-wrap"><table><thead><tr>'+
+    '<th class="sticky" rowspan="2">No</th><th class="sticky" rowspan="2">Nama</th>';
+  for (var lm=1; lm<=5; lm++) {
+    html += '<th class="grp" colspan="4">LM '+lm+'</th>';
+  }
+  html += '<th colspan="5" style="background:#fff9c3">Sumatif</th>';
+  html += '<th colspan="2" style="background:#ffe0b2">Semester</th>';
+  if (showHasil) html += '<th colspan="4" style="background:#b2dfdb">Hasil</th>';
+  html += '</tr><tr>';
+  for (var lm2=1; lm2<=5; lm2++) { html += '<th>TP1</th><th>TP2</th><th>TP3</th><th>TP4</th>'; }
+  html += '<th>LM1</th><th>LM2</th><th>LM3</th><th>LM4</th><th>LM5</th>';
+  html += '<th>STS</th><th>SAS</th>';
+  if (showHasil) html += '<th>LM Total</th><th>NA</th><th>Rapor</th><th>Rank</th>';
+  html += '</tr></thead><tbody>';
+
+  data.forEach(function (s, idx) {
+    html += '<tr><td class="sticky">'+s.no+'</td><td class="sticky" style="text-align:left;font-weight:600">'+s.nama+'</td>';
+    FIELDS.forEach(function (f) {
+      var v = s.nilai[f[0]];
+      html += '<td>'+renderCell(idx, f[0], v, editable)+'</td>';
+    });
+    if (showHasil) {
+      var calc = hitungSiswa(s.nilai);
+      html += '<td class="hasil">'+(calc.lmTotal!==null?calc.lmTotal.toFixed(1):'–')+'</td>';
+      html += '<td class="hasil">'+(calc.na!==null?calc.na.toFixed(1):'–')+'</td>';
+      html += '<td class="hasil '+(calc.tuntas?'tuntas':'belum')+'">'+(calc.nilaiRapor!==null?calc.nilaiRapor:'–')+'</td>';
+      html += '<td class="hasil">'+(idx+1)+'</td>';
+    }
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  container.innerHTML = html;
+}
+
+function renderCell(idx, field, v, editable) {
+  var tone = '';
+  if (state.activeSheet !== 'awal' && v !== null && v !== undefined) {
+    if (v < state.kktp) tone = 'danger';
+    else if (v === state.kktp) tone = 'warning';
+    else tone = 'success';
+  }
+  var display = (v !== null && v !== undefined) ? v : '–';
+  if (!editable) {
+    return '<span class="cell '+tone+'">'+display+'</span>';
+  }
+  return '<span class="cell '+tone+'" onclick="editCell(this,'+idx+',\''+field+'\','+(v||'null')+')">'+display+'</span>';
+}
+
+function editCell(span, idx, field, oldval) {
+  if (span.querySelector('input')) return;
+  span.innerHTML = '<input type="number" min="0" max="100" value="'+(oldval||'')+'">';
+  var inp = span.querySelector('input');
+  inp.focus(); inp.select();
+  function save() {
+    var raw = inp.value.trim();
+    var val = raw === '' ? null : Math.max(0, Math.min(100, Number(raw)));
+    if (raw !== '' && isNaN(Number(raw))) { toast('Nilai tidak valid', true); span.innerHTML = (oldval||'–'); return; }
+    span.innerHTML = val!==null ? val : '–';
+    if (val !== oldval) simpanNilai(idx, field, val);
+  }
+  inp.onblur = save;
+  inp.onkeydown = function(e){
+    if (e.key==='Enter') inp.blur();
+    if (e.key==='Escape') { span.innerHTML = oldval||'–'; }
+  };
+}
+
+function simpanNilai(idx, field, val) {
+  var sheetName = SHEETS[state.activeSheet].sheetName;
+  // optimistic update
+  var data = state.nilai[state.activeSheet];
+  if (data[idx]) data[idx].nilai[field] = val;
+  google.script.run.withSuccessHandler(function(){}).simpanNilai(sheetName, idx, field, val);
+}
+
+// ============ MOBILE INPUT ============
+function simpanMobile() {
+  var no = parseInt(document.getElementById('mStudent').value);
+  var field = document.getElementById('mField').value;
+  var raw = document.getElementById('mValue').value.trim();
+  var val = raw === '' ? null : Math.max(0, Math.min(100, Number(raw)));
+  if (raw !== '' && isNaN(Number(raw))) { toast('Nilai tidak valid', true); return; }
+  var idx = state.siswa.findIndex(function(s){return s.no===no;});
+  if (idx < 0) return;
+  simpanNilai(idx, field, val);
+  // update UI
+  if (state.nilai[state.activeSheet] && state.nilai[state.activeSheet][idx]) {
+    state.nilai[state.activeSheet][idx].nilai[field] = val;
+    renderTabel();
+  }
+  toast('Tersimpan: '+(val===null?'kosong':val));
+  document.getElementById('mValue').value = '';
+}
+
+// ============ REKAP ============
+function loadRekap() {
+  var sheetName = SHEETS[state.activeSheet].sheetName;
+  var btn = event && event.target ? event.target : null;
+  google.script.run.withSuccessHandler(function (res) {
+    renderRekap(res);
+  }).getRekap(sheetName);
+}
+
+function renderRekap(res) {
+  var siswa = res.siswa;
+  if (siswa.length === 0) {
+    document.getElementById('rekapStats').innerHTML = '';
+    document.getElementById('rekapTable').innerHTML = '<div class="empty-state"><p>Belum ada siswa.</p></div>';
+    return;
+  }
+  // Statistik
+  var rapors = siswa.map(function(s){return s.calc.nilaiRapor;}).filter(function(n){return n!==null;});
+  var total = rapors.length, sum = rapors.reduce(function(a,b){return a+b;},0);
+  var avg = total ? sum/total : null;
+  var max = total ? Math.max.apply(null, rapors) : null;
+  var min = total ? Math.min.apply(null, rapors) : null;
+  var tuntas = rapors.filter(function(n){return n >= res.kktp;}).length;
+  document.getElementById('rekapStats').innerHTML =
+    '<span class="badge">Total: '+siswa.length+'</span>'+
+    '<span class="badge">Rata²: '+(avg?avg.toFixed(1):'–')+'</span>'+
+    '<span class="badge">Tertinggi: '+(max||'–')+'</span>'+
+    '<span class="badge">Terendah: '+(min||'–')+'</span>'+
+    '<span class="badge primary">Tuntas: '+tuntas+'/'+total+'</span>';
+
+  // Tabel
+  var html = '<div class="table-wrap"><table><thead><tr>'+
+    '<th>Rank</th><th>No</th><th>Nama</th>'+
+    '<th>LM1</th><th>LM2</th><th>LM3</th><th>LM4</th><th>LM5</th>'+
+    '<th>LM Total</th><th>STS</th><th>SAS</th>'+
+    '<th>NA</th><th>Rapor</th><th>Predikat</th><th>Status</th></tr></thead><tbody>';
+  siswa.forEach(function(s){
+    var c = s.calc;
+    var topRank = c.rank === 1;
+    html += '<tr'+(topRank?' style="background:#f0fdf4"':'')+'>'+
+      '<td>'+(c.rank?'<b>#'+c.rank+'</b>':'–')+'</td>'+
+      '<td>'+s.no+'</td><td style="text-align:left;font-weight:600">'+s.nama+'</td>'+
+      '<td>'+(c.lm1||'–')+'</td><td>'+(c.lm2||'–')+'</td><td>'+(c.lm3||'–')+'</td>'+
+      '<td>'+(c.lm4||'–')+'</td><td>'+(c.lm5||'–')+'</td>'+
+      '<td class="hasil">'+(c.lmTotal!==null?c.lmTotal.toFixed(1):'–')+'</td>'+
+      '<td>'+(c.sts||'–')+'</td><td>'+(c.sas||'–')+'</td>'+
+      '<td class="hasil">'+(c.na!==null?c.na.toFixed(1):'–')+'</td>'+
+      '<td class="hasil '+(c.tuntas?'tuntas':'belum')+'">'+(c.nilaiRapor||'–')+'</td>'+
+      '<td>'+c.predikat+'</td>'+
+      '<td>'+(c.nilaiRapor!==null?'<span class="badge '+(c.tuntas?'primary':'')+'" style="'+(c.tuntas?'':'background:#fee2e2;color:#991b1b')+'">'+(c.tuntas?'Tuntas':'Belum')+'</span>':'')+'</td>'+
+      '</tr>';
+  });
+  html += '</tbody></table></div>';
+  document.getElementById('rekapTable').innerHTML = html;
+}
+
+// ============ PERHITUNGAN (mirror code.gs) ============
+function avgNum(a) {
+  var v = a.filter(function(n){return n!==null && n!==undefined && !isNaN(n);});
+  return v.length ? v.reduce(function(s,n){return s+n;},0)/v.length : null;
+}
+function hitungSiswa(g) {
+  var lmForm = [
+    avgNum([g.lm1Tp1,g.lm1Tp2,g.lm1Tp3,g.lm1Tp4]),
+    avgNum([g.lm2Tp1,g.lm2Tp2,g.lm2Tp3,g.lm2Tp4]),
+    avgNum([g.lm3Tp1,g.lm3Tp2,g.lm3Tp3,g.lm3Tp4]),
+    avgNum([g.lm4Tp1,g.lm4Tp2,g.lm4Tp3,g.lm4Tp4]),
+    avgNum([g.lm5Tp1,g.lm5Tp2,g.lm5Tp3,g.lm5Tp4])
+  ];
+  var lmSum = [g.lm1Sumatif,g.lm2Sumatif,g.lm3Sumatif,g.lm4Sumatif,g.lm5Sumatif];
+  var lmNilai = lmForm.map(function(f,i){return combineLm(f, lmSum[i]);});
+  var lmTotal = avgNum(lmNilai);
+  var sts = g.sts||null, sas = g.sas||null, na = null;
+  if (lmTotal !== null) {
+    var parts = [{v:lmTotal,w:state.bobot.lm}];
+    if (sts!==null) parts.push({v:sts,w:state.bobot.sts});
+    if (sas!==null) parts.push({v:sas,w:state.bobot.sas});
+    var tw = parts.reduce(function(s,p){return s+p.w;},0);
+    na = parts.reduce(function(s,p){return s+p.v*p.w;},0)/tw;
+  }
+  var rapor = na!==null?Math.round(na):null, predikat='-', tuntas=false;
+  if (rapor!==null) {
+    tuntas = rapor >= state.kkm;
+    predikat = rapor>=90?'A (Sangat Baik)':rapor>=80?'B (Baik)':rapor>=state.kkm?'C (Cukup)':'D (Belum Tuntas)';
+  }
+  return { lm1:r(lmNilai[0]),lm2:r(lmNilai[1]),lm3:r(lmNilai[2]),lm4:r(lmNilai[3]),lm5:r(lmNilai[4]),
+           sts:sts,sas:sas,lmTotal:r(lmTotal),na:r(na),nilaiRapor:rapor,predikat:predikat,tuntas:tuntas };
+}
+function r(n){return n!==null?Math.round(n*100)/100:null;}
+function combineLm(f,s){ if(f!==null&&s!==null)return(f+s)/2; return f!==null?f:(s!==null?s:null); }
+
+// ============ TOAST / MODAL ============
+function toast(msg, err) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show'+(err?' err':'');
+  setTimeout(function(){ t.className = 'toast'; }, 2200);
+}
+function showAbout() { document.getElementById('aboutModal').classList.add('show'); }
+function closeAbout() { document.getElementById('aboutModal').classList.remove('show'); }
+
+// ============ START ============
+google.script.run.withSuccessHandler(function(){ init(); }).getInfoKelas();
+</script>
+</body>
+</html>
