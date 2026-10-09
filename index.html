@@ -387,7 +387,7 @@ table.nilai-table{
 <!-- ============================ LOGIN SCREEN ============================ -->
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
-    <div class="logo">📊</div>
+<div class="logo"><img src="https://apxid.github.io/sireva/assets/sireva.png" alt="Logo SIREVA" style="width:100%;height:100%;object-fit:contain;"></div>
     <h1>Pengolah Nilai Informatika</h1>
     <div class="subtitle">SMP — Kelas 9 — Semester 1 — TA 2026/2027</div>
     <div class="login-error" id="loginError"></div>
@@ -613,7 +613,7 @@ table.nilai-table{
    KONFIGURASI — GANTI SCRIPT_URL DENGAN URL WEB APP ANDA
    URL berformat: https://script.google.com/macros/s/<DEPLOYMENT_ID>/exec
    ============================================================================ */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUkLI-WOyQ-tzeTznikaNX90DKf_KCrx3gLwfwRIn2KfdRqzi1_OxXBfEnwb7rNgtK/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwXazJXmIQynAxxgIPrv6JsRMCIbGl9kh8IxxD2Gjc8T0a7gu71Iv4LdQ-Q258JdOr/exec";
 
 /* State management */
 let state = {
@@ -739,12 +739,17 @@ async function loadKelasList(){
       sel.innerHTML = '';
       r.kelas.forEach(k => {
         const opt = document.createElement('option');
-        opt.value = k.kode; opt.textContent = k.nama + (k.guru ? ' — ' + k.guru : '');
+        opt.value = k.kode;
+        opt.textContent = k.nama + (k.guru ? ' — ' + k.guru : '') + (k.sheetReady ? '' : ' (belum dibuat)');
         sel.appendChild(opt);
       });
-      // Default ke 9A
       state.kelas = r.kelas[0].kode;
       sel.value = state.kelas;
+      // Auto-init sheet jika belum ada
+      if(!r.kelas[0].sheetReady){
+        const initR = await api('initKelas', { kelas: state.kelas });
+        if(initR.status === 'ok') toast('success', initR.message);
+      }
       await loadNilai();
     }
   } catch(e){
@@ -754,7 +759,36 @@ async function loadKelasList(){
 
 function onKelasChange(){
   state.kelas = document.getElementById('kelasSelect').value;
-  loadNilai();
+  const k = state.kelasList.find(x => x.kode === state.kelas);
+  if(k && !k.sheetReady){
+    autoInitKelas(state.kelas);
+  } else {
+    loadNilai();
+  }
+}
+
+async function autoInitKelas(kelas){
+  showLoading(true);
+  try{
+    const r = await api('initKelas', { kelas: kelas });
+    if(r.status === 'ok'){
+      toast('success', r.message);
+      const k = state.kelasList.find(x => x.kode === kelas);
+      if(k) k.sheetReady = true;
+      // Update dropdown text
+      const sel = document.getElementById('kelasSelect');
+      Array.from(sel.options).forEach(opt => {
+        if(opt.value === kelas){
+          const kData = state.kelasList.find(x => x.kode === kelas);
+          opt.textContent = kData.nama + (kData.guru ? ' — ' + kData.guru : '');
+        }
+      });
+      await loadNilai();
+    } else {
+      toast('error', r.message);
+    }
+  } catch(e){ toast('error', e.message); }
+  finally { showLoading(false); }
 }
 
 function onTipeChange(){
