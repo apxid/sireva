@@ -1110,9 +1110,9 @@ function fmt(v, decimals = 0) {
      ========================= -->
 <div id="loginLayer">
   <div class="login-card">
-    <div class="login-logo">Ri</div>
+    <div class="login-logo">RN</div>
     <div class="login-title">REKAP NILAI INFORMATIKA</div>
-    <div class="login-subtitle">Sistem Penilaian Berbasis <b>Google Apps Script</b></div>
+
 
     <div class="input-group">
       <label for="loginUsername">USERNAME</label>
@@ -1452,6 +1452,18 @@ async function doLogin() {
     const res = await apiCall('login', { username: u, password: p });
     if (res.success) {
       currentUser = res.user;
+      // SIMPAN SESSION KE LOCALSTORAGE agar tidak logout saat reload
+      // Session berisi username, nama, dan timestamp login
+      const session = {
+        username: res.user.username,
+        nama: res.user.nama,
+        ts: Date.now()
+      };
+      try {
+        localStorage.setItem('rni_session', JSON.stringify(session));
+      } catch (e) {
+        console.warn('LocalStorage tidak tersedia:', e);
+      }
       showLoginMsg('Login berhasil! Memuat...', 'info');
       setTimeout(() => {
         document.getElementById('loginLayer').classList.add('hidden');
@@ -1478,6 +1490,12 @@ function showLoginMsg(text, type) {
 
 function doLogout() {
   currentUser = null;
+  // HAPUS SESSION DARI LOCALSTORAGE - hanya logout saat user klik tombol ini
+  try {
+    localStorage.removeItem('rni_session');
+  } catch (e) {
+    console.warn('LocalStorage tidak tersedia:', e);
+  }
   document.getElementById('loginLayer').classList.remove('hidden');
   document.getElementById('appLayer').classList.remove('active');
   document.getElementById('loginUsername').value = '';
@@ -1485,6 +1503,31 @@ function doLogout() {
   document.getElementById('btnLogin').disabled = false;
   document.getElementById('btnLogin').textContent = 'MASUK';
   document.getElementById('loginMsg').classList.remove('show');
+}
+
+// === RESTORE SESSION DARI LOCALSTORAGE SAAT PAGE LOAD ===
+// Cek apakah user sudah login sebelumnya (session tersimpan). Jika ya, langsung masuk ke app
+// tanpa harus login ulang. Session expired setelah 24 jam (default).
+function restoreSession() {
+  try {
+    const raw = localStorage.getItem('rni_session');
+    if (!raw) return false;
+    const session = JSON.parse(raw);
+    if (!session || !session.username || !session.nama) return false;
+    // Cek expiry: 24 jam (86400000 ms)
+    const SESSION_MAX_AGE = 24 * 60 * 60 * 1000;
+    if (session.ts && (Date.now() - session.ts > SESSION_MAX_AGE)) {
+      // Session expired - hapus
+      localStorage.removeItem('rni_session');
+      return false;
+    }
+    // Session valid - restore currentUser
+    currentUser = { username: session.username, nama: session.nama };
+    return true;
+  } catch (e) {
+    console.warn('Gagal restore session:', e);
+    return false;
+  }
 }
 
 // Enter key submit
@@ -2041,9 +2084,18 @@ function renderPrintFooter() {
 
 // === CEK STATUS APP PERTAMA KALI ===
 async function checkFirstRun() {
-  // Hanya penanda - login akan handle sisanya
-  // Auto focus pada username
-  document.getElementById('loginUsername').focus();
+  // Cek apakah ada session tersimpan di localStorage
+  // Jika ada dan masih valid (< 24 jam), langsung masuk app tanpa login ulang
+  // Jika tidak ada, tampilkan halaman login
+  if (restoreSession()) {
+    // Session valid - masuk app langsung
+    document.getElementById('loginLayer').classList.add('hidden');
+    document.getElementById('appLayer').classList.add('active');
+    initApp();
+  } else {
+    // Tidak ada session - tampilkan login
+    document.getElementById('loginUsername').focus();
+  }
 }
 
 // === INIT ===
