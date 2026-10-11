@@ -478,6 +478,7 @@ table.grade-table {
   width: 100%;
   font-size: 12px;
   background: #fff;
+  table-layout: fixed; /* penting: kontrol lebar kolom ketat, tidak auto-stretch */
 }
 .grade-table th, .grade-table td {
   border: 1px solid #cbd5e1;
@@ -485,6 +486,8 @@ table.grade-table {
   text-align: center;
   vertical-align: middle;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .grade-table thead th {
   background: linear-gradient(135deg, var(--blue), var(--blue-light));
@@ -508,41 +511,85 @@ table.grade-table {
 }
 .grade-table tbody tr:nth-child(even) { background: #f8fafc; }
 .grade-table tbody tr:hover { background: #eef2ff; }
-.grade-table td.no { font-weight: 600; background: #f1f5f9; }
+
+/* === Kolom NO: fixed 48px, sticky di left:0 === */
+.grade-table th.no,
+.grade-table td.no {
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: #f1f5f9;
+  font-weight: 600;
+  box-shadow: 1px 0 0 #cbd5e1;
+}
+.grade-table th.no {
+  z-index: 4;
+  top: 0;
+}
+
+/* === Kolom NAMA: fixed 230px, sticky di left:48px (= NO width) === */
+.grade-table th.nama,
 .grade-table td.nama {
+  width: 230px;
+  min-width: 230px;
+  max-width: 230px;
+  position: sticky;
+  left: 48px; /* HARUS sama dengan width NO di atas */
+  z-index: 1;
+  background: #f8fafc;
   text-align: left;
   font-weight: 500;
-  min-width: 200px;
-  max-width: 240px;
-  background: #f8fafc;
-  position: sticky;
-  left: 60px;
-  z-index: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   box-shadow: 1px 0 0 #cbd5e1;
 }
 .grade-table th.nama {
-  position: sticky;
-  left: 60px;
   z-index: 3;
   background: var(--blue);
   box-shadow: 1px 0 0 rgba(255,255,255,.3);
 }
-.grade-table th.no {
-  position: sticky;
-  left: 0; top: 0;
-  z-index: 4;
-  min-width: 40px;
+.grade-table td.nama:hover,
+.grade-table th.nama:hover {
+  white-space: normal;
+  overflow: visible;
 }
-.grade-table td.no {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  min-width: 40px;
-  box-shadow: 1px 0 0 #cbd5e1;
+
+/* === Kolom TP (FORMATIF): lebar 55px, cukup untuk angka 0-100 === */
+.grade-table th.tp-col,
+.grade-table td.tp-col {
+  width: 55px;
+  min-width: 55px;
+  max-width: 55px;
 }
+
+/* === Kolom LM (W-AA): lebar 55px === */
+.grade-table th.lm-col,
+.grade-table td.lm-col {
+  width: 55px;
+  min-width: 55px;
+  max-width: 55px;
+}
+
+/* === Kolom computed (AB, AD, AF): 60px === */
+.grade-table th.comp-col,
+.grade-table td.comp-col {
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+}
+
+/* === Kolom NA / Rapor / Rank === */
+.grade-table th.na-col, .grade-table td.na-col { width: 55px; }
+.grade-table th.rapor-col, .grade-table td.rapor-col { width: 70px; }
+.grade-table th.rank-col, .grade-table td.rank-col { width: 50px; }
+
 .grade-table input.cell-input {
   width: 100%;
-  min-width: 38px;
+  min-width: 40px;
   border: none;
   background: transparent;
   text-align: center;
@@ -974,7 +1021,7 @@ table.grade-table {
      ========================================================= -->
 <script>
 // Ganti dengan URL Apps Script Web App Anda (akhiran /exec)
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyoJCh1VQrH8WHd0HPXviCEA3v1-fq-dmYqXLZTG2os4hFLZQngeUdBRore6Y_3UmKJDA/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxheAMg9-5Is1U1aEKjomeT4kZNT0b576ZoDaXaJrInYUm-Rw6E3K0fY0zvDd1Q7-rB/exec';
 
 // State global
 let currentUser = null;
@@ -1230,8 +1277,12 @@ function fmt(v, decimals = 0) {
         <input type="text" id="setupMapel" value="INFORMATIKA">
       </div>
       <div class="form-group">
-        <label>KKTP</label>
-        <input type="number" id="setupKktp" value="78">
+        <label>KKTP <small style="color:#dc2626;font-weight:normal;">(= nilai minimum NA rapor)</small></label>
+        <input type="number" id="setupKktp" value="79" min="0" max="100" title="KKTP = Kriteria Ketercapaian Tujuan Pembelajaran. Nilai minimum NA rapor yang diberikan ke siswa dengan NA terendah. Default: 79">
+      </div>
+      <div class="form-group">
+        <label>NA Maksimum <small style="color:#dc2626;font-weight:normal;">(= nilai maksimum NA rapor)</small></label>
+        <input type="number" id="setupNaMax" value="94" min="0" max="100" title="Nilai maksimum NA rapor yang diberikan ke siswa dengan NA tertinggi. Default: 94">
       </div>
       <div class="form-group">
         <label>Semester (judul header)</label>
@@ -1241,6 +1292,15 @@ function fmt(v, decimals = 0) {
         <label>Tahun Ajaran</label>
         <input type="text" id="setupTahun" value="TAHUN AJARAN 2026/2027">
       </div>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #fef9c3, #ecfccb); border-left: 4px solid var(--osis); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: var(--blue-dark); line-height: 1.5;">
+      <strong>Keterangan:</strong>
+      <ul style="margin: 6px 0 0 18px; padding: 0;">
+        <li><strong>KKTP</strong> = nilai minimum NA Rapor (batas bawah scaling, default 79). Siswa dengan NA terendah akan dapat nilai rapor = KKTP.</li>
+        <li><strong>NA Maksimum</strong> = nilai maksimum NA Rapor (batas atas scaling, default 94). Siswa dengan NA tertinggi akan dapat nilai rapor = NA Maksimum.</li>
+        <li>Formula Rapor: <code style="background: var(--vr46-soft); padding: 1px 4px; border-radius: 3px;">((NA − NA_Min)/(NA_Max − NA_Min)) × (NA_Max − KKTP) + KKTP</code></li>
+      </ul>
     </div>
 
     <div class="form-group">
@@ -1326,9 +1386,16 @@ function fmt(v, decimals = 0) {
         <input type="text" id="infoMapel">
       </div>
       <div class="form-group">
-        <label>KKTP</label>
-        <input type="number" id="infoKktp">
+        <label>KKTP <small style="color:#dc2626;font-weight:normal;">(= nilai minimum NA rapor)</small></label>
+        <input type="number" id="infoKktp" min="0" max="100">
       </div>
+      <div class="form-group">
+        <label>NA Maksimum <small style="color:#dc2626;font-weight:normal;">(= nilai maksimum NA rapor)</small></label>
+        <input type="number" id="infoNaMax" min="0" max="100">
+      </div>
+    </div>
+    <div style="background: linear-gradient(135deg, #fef9c3, #ecfccb); border-left: 4px solid var(--osis); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: var(--blue-dark); line-height: 1.5;">
+      <strong>Catatan:</strong> Mengubah KKTP / NA Maksimum hanya mengubah nilai di header. Untuk menerapkan ke formula Nilai Rapor seluruh siswa, hapus kelas ini lalu buat ulang via <strong>+ Kelas Baru</strong>.
     </div>
     <div style="display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap;">
       <button class="btn" onclick="saveKelasInfo()" style="flex: 1; min-width: 120px;">SIMPAN INFO</button>
@@ -1567,35 +1634,33 @@ function renderTable() {
   // Formatif (C-V: 5 LM)
   html += '<th colspan="20" class="lm-header">FORMATIF (5 Lingkup Materi × 4 TP)</th>';
   html += '<th colspan="5" class="lm-header">SUMATIF LINGKUP MATERI</th>';
-  html += '<th rowspan="3" class="result-header">30% LM TOTAL</th>';
-  html += '<th rowspan="3" class="sts-header">STS</th>';
-  html += '<th rowspan="3" class="sts-header">30% STS</th>';
-  html += '<th rowspan="3" class="sts-header">SAS</th>';
-  html += '<th rowspan="3" class="sts-header">40% SAS</th>';
-  html += '<th rowspan="3" class="result-header">NA</th>';
-  html += '<th rowspan="3" class="result-header">NILAI RAPOR</th>';
-  html += '<th rowspan="3" class="result-header">RANK</th>';
+  html += '<th rowspan="3" class="result-header comp-col">30% LM TOTAL</th>';
+  html += '<th rowspan="3" class="sts-header comp-col">STS</th>';
+  html += '<th rowspan="3" class="sts-header comp-col">30% STS</th>';
+  html += '<th rowspan="3" class="sts-header comp-col">SAS</th>';
+  html += '<th rowspan="3" class="sts-header comp-col">40% SAS</th>';
+  html += '<th rowspan="3" class="result-header na-col">NA</th>';
+  html += '<th rowspan="3" class="result-header rapor-col">NILAI RAPOR</th>';
+  html += '<th rowspan="3" class="result-header rank-col">RANK</th>';
   html += '</tr>';
 
-  // Row 2: LM names
+  // Row 2: LM names (TP4×5 = 20 cols + LM 5 cols)
   html += '<tr>';
   for (let lm = 1; lm <= 5; lm++) {
     html += `<th colspan="4" class="lm-header">Lingkup Materi ${lm}</th>`;
   }
   for (let lm = 1; lm <= 5; lm++) {
-    html += `<th class="lm-header">LM${lm}</th>`;
+    html += `<th class="lm-header lm-col">LM${lm}</th>`;
   }
   html += '</tr>';
 
-  // Row 3: TP names
+  // Row 3: TP names (20 cols) + LM (5 cols, already added in row 2 via rowspan, but here just empty cells)
+  // Actually we added LM in row 2, so row 3 only needs the 20 TP cols
   html += '<tr>';
   for (let lm = 1; lm <= 5; lm++) {
     for (let tp = 1; tp <= 4; tp++) {
-      html += `<th>TP${tp}</th>`;
+      html += `<th class="tp-col">TP${tp}</th>`;
     }
-  }
-  for (let lm = 1; lm <= 5; lm++) {
-    html += `<th>LM${lm}</th>`;
   }
   html += '</tr>';
 
@@ -1606,50 +1671,50 @@ function renderTable() {
   body.innerHTML = siswa.map((s, i) => {
     let row = '<tr>';
     row += `<td class="no">${s.no || (i+1)}</td>`;
-    row += `<td class="nama">${escapeHtml(s.nama)}</td>`;
+    row += `<td class="nama" title="${escapeHtml(s.nama)}">${escapeHtml(s.nama)}</td>`;
 
-    // TP cells (C-V)
+    // TP cells (C-V) - 20 cols
     for (let lm = 0; lm < 5; lm++) {
       for (let tp = 0; tp < 4; tp++) {
         const colKey = 'TP' + (tp+1) + '_LM' + (lm+1);
         const val = s.tp[lm][tp];
         const isInputCol = mode === 'full' || selectedCols.has(colKey);
         if (isInputCol) {
-          row += `<td><input type="number" min="0" max="100" class="cell-input" data-row="${s.row}" data-col="${colKey}" value="${val}" onfocus="this.select()" onchange="onCellEdit(this)"></td>`;
+          row += `<td class="tp-col"><input type="number" min="0" max="100" class="cell-input" data-row="${s.row}" data-col="${colKey}" value="${val}" onfocus="this.select()" onchange="onCellEdit(this)"></td>`;
         } else {
-          row += `<td class="computed lm">${fmt(val)}</td>`;
+          row += `<td class="computed lm tp-col">${fmt(val)}</td>`;
         }
       }
     }
 
-    // LM1-LM5 (W-AA)
+    // LM1-LM5 (W-AA) - 5 cols
     for (let lm = 0; lm < 5; lm++) {
-      row += `<td class="computed lm">${fmt(s.lm[lm], 1)}</td>`;
+      row += `<td class="computed lm lm-col">${fmt(s.lm[lm], 1)}</td>`;
     }
     // 30% LM Total
-    row += `<td class="computed">${fmt(s.lmTotal)}</td>`;
+    row += `<td class="computed comp-col">${fmt(s.lmTotal)}</td>`;
     // STS (input if selected, else read-only)
     if (mode === 'full' || selectedCols.has('STS')) {
-      row += `<td><input type="number" min="0" max="100" class="cell-input" data-row="${s.row}" data-col="STS" value="${s.sts}" onfocus="this.select()" onchange="onCellEdit(this)"></td>`;
+      row += `<td class="comp-col"><input type="number" min="0" max="100" class="cell-input" data-row="${s.row}" data-col="STS" value="${s.sts}" onfocus="this.select()" onchange="onCellEdit(this)"></td>`;
     } else {
-      row += `<td class="computed sts">${fmt(s.sts)}</td>`;
+      row += `<td class="computed sts comp-col">${fmt(s.sts)}</td>`;
     }
     // 30% STS
-    row += `<td class="computed sts">${fmt(s.stsPct, 1)}</td>`;
+    row += `<td class="computed sts comp-col">${fmt(s.stsPct, 1)}</td>`;
     // SAS (input if selected)
     if (mode === 'full' || selectedCols.has('SAS')) {
-      row += `<td><input type="number" min="0" max="100" class="cell-input" data-row="${s.row}" data-col="SAS" value="${s.sas}" onfocus="this.select()" onchange="onCellEdit(this)"></td>`;
+      row += `<td class="comp-col"><input type="number" min="0" max="100" class="cell-input" data-row="${s.row}" data-col="SAS" value="${s.sas}" onfocus="this.select()" onchange="onCellEdit(this)"></td>`;
     } else {
-      row += `<td class="computed sts">${fmt(s.sas)}</td>`;
+      row += `<td class="computed sts comp-col">${fmt(s.sas)}</td>`;
     }
     // 40% SAS
-    row += `<td class="computed sts">${fmt(s.sasPct, 1)}</td>`;
+    row += `<td class="computed sts comp-col">${fmt(s.sasPct, 1)}</td>`;
     // NA
-    row += `<td class="computed na">${fmt(s.na, 1)}</td>`;
+    row += `<td class="computed na na-col">${fmt(s.na, 1)}</td>`;
     // Rapor
-    row += `<td class="computed rapor">${fmt(s.rapor)}</td>`;
+    row += `<td class="computed rapor rapor-col">${fmt(s.rapor)}</td>`;
     // Rank
-    row += `<td class="computed rank">${s.rank || ''}</td>`;
+    row += `<td class="computed rank rank-col">${s.rank || ''}</td>`;
 
     row += '</tr>';
     return row;
@@ -1789,7 +1854,8 @@ async function submitSetupKelas() {
     kelasName: kelasName,
     kelasInfo: document.getElementById('setupKelasInfo').value.trim(),
     mapel: document.getElementById('setupMapel').value.trim() || 'INFORMATIKA',
-    kktp: Number(document.getElementById('setupKktp').value) || 78,
+    kktp: Number(document.getElementById('setupKktp').value) || 79,
+    naMax: Number(document.getElementById('setupNaMax').value) || 94,
     semester: document.getElementById('setupSemester').value.trim() || 'DAFTAR NILAI SEMESTER 1',
     tahunAjaran: document.getElementById('setupTahun').value.trim() || 'TAHUN AJARAN 2026/2027',
     siswa: siswa,
@@ -1863,7 +1929,8 @@ function showKelasInfoModal() {
   document.getElementById('infoTahun').value = kelasData?.tahunAjaran || 'TAHUN AJARAN 2026/2027';
   document.getElementById('infoKelas').value = kelasData?.kelasInfo || '';
   document.getElementById('infoMapel').value = kelasData?.mapel || 'INFORMATIKA';
-  document.getElementById('infoKktp').value = kelasData?.kktp || 78;
+  document.getElementById('infoKktp').value = kelasData?.kktp ?? 79;
+  document.getElementById('infoNaMax').value = kelasData?.naMax ?? 94;
   showModal('kelasInfoModal');
 }
 
@@ -1875,7 +1942,8 @@ async function saveKelasInfo() {
     tahunAjaran: document.getElementById('infoTahun').value,
     kelasInfo: document.getElementById('infoKelas').value,
     mapel: document.getElementById('infoMapel').value,
-    kktp: Number(document.getElementById('infoKktp').value)
+    kktp: Number(document.getElementById('infoKktp').value),
+    naMax: Number(document.getElementById('infoNaMax').value)
   };
   showLoading('Menyimpan info kelas...');
   try {
