@@ -1021,7 +1021,7 @@ table.grade-table {
      ========================================================= -->
 <script>
 // Ganti dengan URL Apps Script Web App Anda (akhiran /exec)
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxheAMg9-5Is1U1aEKjomeT4kZNT0b576ZoDaXaJrInYUm-Rw6E3K0fY0zvDd1Q7-rB/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwxaDlRGI5IF4cxA1miyAajW-pUtoIayViGkieIUbklYc7hxb02NOrlgzrv0gMB5WhP/exec';
 
 // State global
 let currentUser = null;
@@ -1277,14 +1277,6 @@ function fmt(v, decimals = 0) {
         <input type="text" id="setupMapel" value="INFORMATIKA">
       </div>
       <div class="form-group">
-        <label>KKTP <small style="color:#dc2626;font-weight:normal;">(= nilai minimum NA rapor)</small></label>
-        <input type="number" id="setupKktp" value="79" min="0" max="100" title="KKTP = Kriteria Ketercapaian Tujuan Pembelajaran. Nilai minimum NA rapor yang diberikan ke siswa dengan NA terendah. Default: 79">
-      </div>
-      <div class="form-group">
-        <label>NA Maksimum <small style="color:#dc2626;font-weight:normal;">(= nilai maksimum NA rapor)</small></label>
-        <input type="number" id="setupNaMax" value="94" min="0" max="100" title="Nilai maksimum NA rapor yang diberikan ke siswa dengan NA tertinggi. Default: 94">
-      </div>
-      <div class="form-group">
         <label>Semester (judul header)</label>
         <input type="text" id="setupSemester" value="DAFTAR NILAI SEMESTER 1">
       </div>
@@ -1295,11 +1287,13 @@ function fmt(v, decimals = 0) {
     </div>
 
     <div style="background: linear-gradient(135deg, #fef9c3, #ecfccb); border-left: 4px solid var(--osis); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: var(--blue-dark); line-height: 1.5;">
-      <strong>Keterangan:</strong>
+      <strong>ℹ️ Pengaturan Nilai (KKTP, Nilai Terendah, Nilai Tertinggi):</strong>
       <ul style="margin: 6px 0 0 18px; padding: 0;">
-        <li><strong>KKTP</strong> = nilai minimum NA Rapor (batas bawah scaling, default 79). Siswa dengan NA terendah akan dapat nilai rapor = KKTP.</li>
-        <li><strong>NA Maksimum</strong> = nilai maksimum NA Rapor (batas atas scaling, default 94). Siswa dengan NA tertinggi akan dapat nilai rapor = NA Maksimum.</li>
-        <li>Formula Rapor: <code style="background: var(--vr46-soft); padding: 1px 4px; border-radius: 3px;">((NA − NA_Min)/(NA_Max − NA_Min)) × (NA_Max − KKTP) + KKTP</code></li>
+        <li><strong>KKTP</strong> = Kriteria Ketuntasan Tujuan Pembelajaran (default 75). Siswa dengan NA ≥ KKTP dianggap tuntas.</li>
+        <li><strong>Nilai Terendah</strong> = batas bawah nilai rapor (default 79). Siswa dengan NA terendah akan dapat nilai rapor = Nilai Terendah.</li>
+        <li><strong>Nilai Tertinggi</strong> = batas atas nilai rapor (default 94). Siswa dengan NA tertinggi akan dapat nilai rapor = Nilai Tertinggi.</li>
+        <li><strong>KKTP ≠ Nilai Terendah</strong> — ketiganya diatur di <strong>sheet config</strong> (kolom E-G: key | value | keterangan). Edit langsung di Google Sheets untuk mengubah.</li>
+        <li>Formula Rapor: <code style="background: var(--vr46-soft); padding: 1px 4px; border-radius: 3px;">((NA − Nilai Terendah)/(Nilai Tertinggi − Nilai Terendah)) × (Nilai Tertinggi − Nilai Terendah) + Nilai Terendah</code></li>
       </ul>
     </div>
 
@@ -1385,18 +1379,18 @@ function fmt(v, decimals = 0) {
         <label>Mata Pelajaran</label>
         <input type="text" id="infoMapel">
       </div>
-      <div class="form-group">
-        <label>KKTP <small style="color:#dc2626;font-weight:normal;">(= nilai minimum NA rapor)</small></label>
-        <input type="number" id="infoKktp" min="0" max="100">
+    </div>
+
+    <div style="background: linear-gradient(135deg, #dbeafe, #ecfccb); border-left: 4px solid var(--blue); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: var(--blue-dark); line-height: 1.5;">
+      <strong>⚙️ Pengaturan Nilai (dari sheet config):</strong>
+      <div id="configInfo" style="margin-top: 6px;">
+        <em style="color: #94a3b8;">Memuat...</em>
       </div>
-      <div class="form-group">
-        <label>NA Maksimum <small style="color:#dc2626;font-weight:normal;">(= nilai maksimum NA rapor)</small></label>
-        <input type="number" id="infoNaMax" min="0" max="100">
+      <div style="margin-top: 8px; font-size: 11px; color: #64748b;">
+        ℹ️ Untuk mengubah KKTP/Nilai Terendah/Nilai Tertinggi, edit langsung di <strong>sheet config</strong> Google Sheets (kolom E-G: key | value | keterangan). Setelah mengubah, refresh halaman aplikasi.
       </div>
     </div>
-    <div style="background: linear-gradient(135deg, #fef9c3, #ecfccb); border-left: 4px solid var(--osis); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: var(--blue-dark); line-height: 1.5;">
-      <strong>Catatan:</strong> Mengubah KKTP / NA Maksimum hanya mengubah nilai di header. Untuk menerapkan ke formula Nilai Rapor seluruh siswa, hapus kelas ini lalu buat ulang via <strong>+ Kelas Baru</strong>.
-    </div>
+
     <div style="display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap;">
       <button class="btn" onclick="saveKelasInfo()" style="flex: 1; min-width: 120px;">SIMPAN INFO</button>
       <button class="btn danger" onclick="confirmDeleteKelas()">HAPUS KELAS</button>
@@ -1546,12 +1540,13 @@ async function loadKelas(kelasName) {
     const res = await apiCall('getKelasData', { kelas: kelasName });
     if (res.success) {
       kelasData = res;
+      const cfg = res.config || { kktp: 75, nilai_terendah: 79, nilai_tertinggi: 94 };
       // Set print header
       document.getElementById('printSemester').textContent = res.semester || 'DAFTAR NILAI SEMESTER 1';
       document.getElementById('printTahun').textContent = res.tahunAjaran || 'TAHUN AJARAN 2026/2027';
       document.getElementById('printKelas').textContent = 'KELAS : ' + (res.kelasInfo || '-');
       document.getElementById('printMapel').textContent = 'MATA PELAJARAN : ' + (res.mapel || 'INFORMATIKA');
-      document.getElementById('printKktp').textContent = 'KKTP : ' + (res.kktp || 78);
+      document.getElementById('printKktp').textContent = 'KKTP : ' + cfg.kktp + ' | NILAI TERENDAH : ' + cfg.nilai_terendah + ' | NILAI TERTINGGI : ' + cfg.nilai_tertinggi;
 
       // Default selected cols: TP1_LM1 ... TP4_LM5
       if (selectedCols.size === 0) {
@@ -1854,8 +1849,6 @@ async function submitSetupKelas() {
     kelasName: kelasName,
     kelasInfo: document.getElementById('setupKelasInfo').value.trim(),
     mapel: document.getElementById('setupMapel').value.trim() || 'INFORMATIKA',
-    kktp: Number(document.getElementById('setupKktp').value) || 79,
-    naMax: Number(document.getElementById('setupNaMax').value) || 94,
     semester: document.getElementById('setupSemester').value.trim() || 'DAFTAR NILAI SEMESTER 1',
     tahunAjaran: document.getElementById('setupTahun').value.trim() || 'TAHUN AJARAN 2026/2027',
     siswa: siswa,
@@ -1866,6 +1859,7 @@ async function submitSetupKelas() {
       guruNip: document.getElementById('setupGuruNip').value.trim(),
       kota: document.getElementById('setupKota').value.trim() || 'Moga, …......................'
     }
+    // KKTP, Nilai Terendah, Nilai Tertinggi tidak dikirim - sumbernya dari sheet config
   };
 
   showLoading('Membuat kelas ' + kelasName + '...');
@@ -1929,8 +1923,27 @@ function showKelasInfoModal() {
   document.getElementById('infoTahun').value = kelasData?.tahunAjaran || 'TAHUN AJARAN 2026/2027';
   document.getElementById('infoKelas').value = kelasData?.kelasInfo || '';
   document.getElementById('infoMapel').value = kelasData?.mapel || 'INFORMATIKA';
-  document.getElementById('infoKktp').value = kelasData?.kktp ?? 79;
-  document.getElementById('infoNaMax').value = kelasData?.naMax ?? 94;
+  // Tampilkan info config (KKTP, Nilai Terendah, Nilai Tertinggi) - read-only
+  const cfg = kelasData?.config || { kktp: 75, nilai_terendah: 79, nilai_tertinggi: 94 };
+  document.getElementById('configInfo').innerHTML = `
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
+      <div style="flex: 1; min-width: 100px; background: #fff; padding: 8px 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+        <div style="font-size: 10px; color: #64748b; font-weight: 600;">KKTP</div>
+        <div style="font-size: 18px; font-weight: 700; color: var(--blue-dark);">${cfg.kktp}</div>
+        <div style="font-size: 9px; color: #94a3b8;">Threshold Ketuntasan</div>
+      </div>
+      <div style="flex: 1; min-width: 100px; background: #fff; padding: 8px 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+        <div style="font-size: 10px; color: #64748b; font-weight: 600;">NILAI TERENDAH</div>
+        <div style="font-size: 18px; font-weight: 700; color: var(--blue-dark);">${cfg.nilai_terendah}</div>
+        <div style="font-size: 9px; color: #94a3b8;">Batas Bawah Rapor</div>
+      </div>
+      <div style="flex: 1; min-width: 100px; background: #fff; padding: 8px 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+        <div style="font-size: 10px; color: #64748b; font-weight: 600;">NILAI TERTINGGI</div>
+        <div style="font-size: 18px; font-weight: 700; color: var(--blue-dark);">${cfg.nilai_tertinggi}</div>
+        <div style="font-size: 9px; color: #94a3b8;">Batas Atas Rapor</div>
+      </div>
+    </div>
+  `;
   showModal('kelasInfoModal');
 }
 
@@ -1941,9 +1954,8 @@ async function saveKelasInfo() {
     semester: document.getElementById('infoSemester').value,
     tahunAjaran: document.getElementById('infoTahun').value,
     kelasInfo: document.getElementById('infoKelas').value,
-    mapel: document.getElementById('infoMapel').value,
-    kktp: Number(document.getElementById('infoKktp').value),
-    naMax: Number(document.getElementById('infoNaMax').value)
+    mapel: document.getElementById('infoMapel').value
+    // KKTP/Nilai Terendah/Nilai Tertinggi tidak dikirim - sumbernya dari sheet config
   };
   showLoading('Menyimpan info kelas...');
   try {
