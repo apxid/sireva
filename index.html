@@ -159,6 +159,87 @@ body::before {
 }
 .login-subtitle b { color: var(--blue); }
 
+/* === Login footer: tampil HANYA saat di login layer (body tidak punya .app-mode).
+   Posisi: statis (mengalir), rata tengah, di bawah login card.
+   Proporsional - tidak fixed, tidak overlap card. */
+body:not(.app-mode) #loginLayer {
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  padding: 16px 16px 24px;
+  overflow-y: auto;
+}
+.login-footer {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,.7);
+  backdrop-filter: blur(8px);
+  padding: 9px 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(203,213,225,.5);
+  box-shadow: 0 4px 12px rgba(15,23,42,.05);
+  transition: all .2s;
+  max-width: 90vw;
+}
+.login-footer:hover {
+  background: #fff;
+  color: var(--blue-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15,23,42,.1);
+}
+.login-footer .footer-dot {
+  width: 8px; height: 8px;
+  background: var(--vr46);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--vr46);
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+.login-footer .footer-rn-badge {
+  background: linear-gradient(135deg, var(--blue), var(--blue-light));
+  color: var(--osis);
+  font-family: 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* === Password visibility toggle (icon mata) === */
+.input-group.has-toggle input { padding-right: 40px; }
+.pwd-toggle {
+  position: absolute;
+  right: 10px;
+  top: 33px; /* sesuaikan dengan posisi input (label 18px + margin) */
+  width: 28px; height: 28px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all .2s;
+}
+.pwd-toggle:hover {
+  background: #e0e7ff;
+  color: var(--blue);
+}
+.pwd-toggle svg {
+  width: 18px; height: 18px;
+  pointer-events: none;
+}
+/* Saat input fokus, icon juga ikut 'active' */
+.input-group.has-toggle input:focus ~ .pwd-toggle { color: var(--blue); }
+
 .input-group {
   position: relative;
   margin-bottom: 14px;
@@ -429,6 +510,19 @@ body::before {
   flex-wrap: wrap;
   gap: 8px;
 }
+/* Label group di col-selector (mis. "FORMATIF - Tujuan Pembelajaran") */
+.col-chip-group {
+  flex-basis: 100%;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin: 12px 0 2px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed var(--line);
+}
+.col-chip-group:first-child { margin-top: 0; }
 .col-chip {
   display: inline-flex;
   align-items: center;
@@ -1007,6 +1101,9 @@ table.grade-table {
 .siswa-row .del-btn:hover { background: var(--err); color: #fff; }
 
 /* === Footer === */
+/* App footer: HANYA tampil saat body punya class .app-mode (saat app aktif).
+   Saat di login layer, app-footer disembunyikan - diganti dengan .login-footer
+   yang statis di bawah login card, rata tengah. */
 .app-footer {
   position: fixed;
   bottom: 0; left: 0; right: 0;
@@ -1017,9 +1114,10 @@ table.grade-table {
   align-items: center;
   justify-content: space-between;
   font-size: 12px;
-  z-index: 220; /* lebih tinggi dari login layer (100) & modal (200) agar selalu tampil */
+  z-index: 220;
   box-shadow: 0 -4px 14px rgba(15,23,42,.1);
 }
+body:not(.app-mode) .app-footer { display: none; }
 .app-footer .footer-text {
   cursor: pointer;
   display: flex;
@@ -1048,27 +1146,26 @@ table.grade-table {
   border-radius: 3px;
 }
 
-/* About popup - putih minimalis profesional */
+/* About popup - SIMPEL & RINGKAS (versi 1.2.0) */
 #aboutModal .modal-card {
   background: #ffffff;
   border-radius: 16px;
   padding: 0;
   overflow: hidden;
-  max-width: 480px;
+  max-width: 360px;
   box-shadow: 0 24px 60px rgba(15,23,42,.18), 0 0 0 1px rgba(15,23,42,.04);
   position: relative;
 }
-/* Override modal-close supaya TAMPIL JELAS di atas hero gradient.
-   Tombol ini HARUS terlihat - beri background putih solid + z-index tinggi. */
+/* Tombol close × di pojok - TAMPIL JELAS di atas hero */
 #aboutModal .modal-close {
   position: absolute;
-  top: 14px; right: 14px;
-  width: 36px; height: 36px;
+  top: 12px; right: 12px;
+  width: 32px; height: 32px;
   background: rgba(255,255,255,.96);
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 22px;
+  font-size: 20px;
   color: #1e3a8a;
   display: flex; align-items: center; justify-content: center;
   transition: all .2s;
@@ -1082,223 +1179,108 @@ table.grade-table {
   color: #fff;
   transform: rotate(90deg);
 }
-.about-content { text-align: center; padding: 0; }
 
-/* Banner atas dengan gradient halus + logo */
-.about-hero {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 60%, #60a5fa 100%);
-  padding: 36px 24px 28px;
-  color: #fff;
-  position: relative;
-  overflow: hidden;
+/* Layout simpel - semua elemen vertikal, text-align center */
+.about-simple {
+  padding: 28px 24px 22px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
 }
-.about-hero::before {
-  content: '';
-  position: absolute;
-  top: -40px; right: -40px;
-  width: 140px; height: 140px;
-  background: radial-gradient(circle, rgba(255,255,255,.18), transparent 70%);
-  border-radius: 50%;
-}
-.about-hero::after {
-  content: '';
-  position: absolute;
-  bottom: -30px; left: -30px;
-  width: 100px; height: 100px;
-  background: radial-gradient(circle, rgba(201,240,58,.25), transparent 70%);
-  border-radius: 50%;
-}
-/* Logo: gunakan gambar dari URL eksternal */
+/* Logo: gambar dari URL, putih, rounded */
 .about-logo {
-  width: 86px; height: 86px;
-  margin: 0 auto 14px;
-  background: rgba(255,255,255,.96);
-  border-radius: 20px;
+  width: 80px; height: 80px;
+  margin: 0 0 14px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
-  box-shadow: 0 8px 22px rgba(0,0,0,.18);
-  position: relative;
-  z-index: 1;
-  /* Jika elemen adalah <img>, override layout dasarnya */
+  box-shadow: 0 6px 16px rgba(15,23,42,.1);
   object-fit: contain;
   padding: 8px;
 }
-.about-logo.img-mode {
-  /* Untuk <img> - reset properti text */
-  font-family: inherit;
-  font-size: 0;
-  font-weight: 400;
-  color: initial;
-}
-.about-title {
+.about-logo.img-mode { font-size: 0; }
+/* Nama aplikasi */
+.about-name {
   font-family: 'Times New Roman', serif;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
+  color: #0f172a;
   margin: 0 0 4px;
   letter-spacing: .3px;
-  position: relative; z-index: 1;
 }
-.about-subtitle {
-  color: rgba(255,255,255,.85);
+/* Jeda space setelah nama */
+.about-spacer {
+  width: 40px; height: 3px;
+  background: linear-gradient(90deg, #1d4ed8, #C9F03A, #FFD60A);
+  border-radius: 3px;
+  margin: 10px 0 14px;
+}
+/* Info compact (developer / build / versi) - 3 baris kecil */
+.about-meta {
   font-size: 12px;
-  margin: 0;
-  position: relative; z-index: 1;
+  color: #475569;
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-
-/* Body putih bersih */
-.about-body { padding: 22px 24px 18px; }
-
-.about-section-title {
+.about-meta .label {
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
   font-size: 10px;
+  letter-spacing: .5px;
+}
+.about-meta .value {
+  color: #1d4ed8;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  color: #64748b;
-  margin: 0 0 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
-.about-section-title::before {
-  content: '';
-  width: 18px; height: 2px;
-  background: #1d4ed8;
-  border-radius: 2px;
-}
-
-.about-info {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 6px 14px;
-  margin: 0 0 18px;
-  text-align: left;
-}
-.about-info .row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 9px 0;
-  border-bottom: 1px solid #e2e8f0;
-  font-size: 12.5px;
-}
-.about-info .row:last-child { border-bottom: none; }
-.about-info .row .key { color: #64748b; font-weight: 500; }
-.about-info .row .val { font-weight: 700; color: #0f172a; }
-.about-info .row .val.accent { color: #1d4ed8; }
-
-/* Card legenda warna nilai */
-.about-legend {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 14px;
-  margin: 0 0 18px;
-  text-align: left;
-}
-.about-legend .legend-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 0;
-  font-size: 12.5px;
-  color: #334155;
-}
-.about-legend .legend-row .swatch {
-  width: 22px; height: 22px;
-  border-radius: 6px;
-  border: 1px solid rgba(0,0,0,.08);
-  flex-shrink: 0;
-}
-.about-legend .legend-row .swatch.below { background: #fee2e2; }
-.about-legend .legend-row .swatch.equal { background: #fef9c3; }
-.about-legend .legend-row .swatch.above { background: #dcfce7; }
-.about-legend .legend-row .desc { color: #64748b; font-size: 11px; margin-left: auto; }
-
-/* Download section - CTA utama */
-.about-download {
-  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
-  border-radius: 12px;
-  padding: 16px;
-  margin: 0 0 18px;
-  text-align: center;
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-}
-.about-download::before {
-  content: '';
-  position: absolute;
-  top: -20px; right: -20px;
-  width: 80px; height: 80px;
-  background: radial-gradient(circle, rgba(201,240,58,.3), transparent 70%);
-  border-radius: 50%;
-}
-.about-download-title {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  color: rgba(255,255,255,.8);
-  margin-bottom: 4px;
-  position: relative; z-index: 1;
-}
-.about-download-sub {
-  font-size: 13px;
-  color: #fff;
-  margin-bottom: 12px;
-  position: relative; z-index: 1;
-}
+/* Link download - tombol simple */
 .about-download-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: #fff;
-  color: #1d4ed8;
+  gap: 6px;
+  background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
+  color: #fff;
   text-decoration: none;
-  padding: 10px 18px;
+  padding: 9px 16px;
   border-radius: 9px;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   transition: transform .15s, box-shadow .2s;
-  box-shadow: 0 6px 14px rgba(0,0,0,.18);
-  position: relative; z-index: 1;
+  box-shadow: 0 4px 12px rgba(29,78,216,.3);
+  margin-top: 8px;
 }
 .about-download-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0,0,0,.25);
+  box-shadow: 0 8px 18px rgba(29,78,216,.4);
 }
-.about-download-btn svg { width: 16px; height: 16px; }
-.about-download-link {
-  display: block;
-  margin-top: 8px;
-  font-size: 11px;
-  color: rgba(255,255,255,.7);
-  font-family: 'Courier New', monospace;
-  word-break: break-all;
-  position: relative; z-index: 1;
+.about-download-btn svg { width: 14px; height: 14px; }
+/* Tombol Tutup */
+.about-close-btn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px;
+  border: 2px solid #1d4ed8;
+  background: #fff;
+  color: #1d4ed8;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
 }
-
-.about-credit {
-  margin: 0 0 4px;
-  padding-top: 14px;
-  border-top: 1px solid #e2e8f0;
-  font-size: 11.5px;
-  color: #64748b;
-}
-.about-credit .heart { color: #dc2626; }
-.about-credit strong { color: #0f172a; font-weight: 700; }
-.about-version {
-  font-size: 10px;
-  color: #94a3b8;
-  margin-top: 4px;
-  letter-spacing: .5px;
+.about-close-btn:hover {
+  background: #1d4ed8;
+  color: #fff;
 }
 
 @media (max-width: 640px) {
   #aboutModal .modal-card { max-width: 100%; margin: 0 8px; }
-  .about-hero { padding: 28px 18px 22px; }
-  .about-body { padding: 18px; }
 }
 
 /* Setup first-run modal */
@@ -1467,6 +1449,43 @@ function hideModal(id) {
 }
 function showAbout() { showModal('aboutModal'); }
 
+// === TOGGLE PASSWORD VISIBILITY ===
+// Tombol mata (eye) untuk show/hide password di form login (dan form lain yang pakai type=password).
+// Saat hidden: icon mata terbuka. Saat shown: icon mata tertutup (garis coret).
+function togglePwdVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isHidden = (input.type === 'password');
+  if (isHidden) {
+    input.type = 'text';
+    btn.classList.add('shown');
+    btn.setAttribute('aria-label', 'Sembunyikan password');
+    btn.title = 'Sembunyikan password';
+    // Ganti icon: mata tertutup (eye-off)
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>' +
+      '<path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>' +
+      '<path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>' +
+      '<line x1="2" y1="2" x2="22" y2="22"/>' +
+      '</svg>';
+  } else {
+    input.type = 'password';
+    btn.classList.remove('shown');
+    btn.setAttribute('aria-label', 'Tampilkan password');
+    btn.title = 'Tampilkan password';
+    // Ganti icon: mata terbuka (eye)
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>' +
+      '<circle cx="12" cy="12" r="3"/>' +
+      '</svg>';
+  }
+  // Pertahankan fokus di input agar user bisa langsung lanjut mengetik
+  input.focus();
+  // Posisikan kursor di akhir teks
+  const len = input.value.length;
+  try { input.setSelectionRange(len, len); } catch (e) {}
+}
+
 function escapeHtml(s) {
   if (s === null || s === undefined) return '';
   return String(s)
@@ -1514,13 +1533,20 @@ function fmt(v, decimals = 0) {
       </svg>
     </div>
 
-    <div class="input-group">
+    <div class="input-group has-toggle">
       <label for="loginPassword">PASSWORD</label>
       <input type="password" id="loginPassword" placeholder="masukkan password" autocomplete="current-password">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
         <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
       </svg>
+      <button type="button" class="pwd-toggle" onclick="togglePwdVisibility('loginPassword', this)" aria-label="Tampilkan / sembunyikan password" title="Tampilkan / sembunyikan password">
+        <!-- Icon: mata terbuka (default - password hidden) -->
+        <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
     </div>
 
     <button class="btn-login" onclick="doLogin()" id="btnLogin">
@@ -1528,6 +1554,13 @@ function fmt(v, decimals = 0) {
     </button>
 
     <div id="loginMsg" class="login-message"></div>
+  </div>
+
+  <!-- LOGIN FOOTER - rata tengah, proporsional, di bawah login card -->
+  <div class="login-footer" onclick="showAbout()">
+    <span class="footer-dot"></span>
+    <span class="footer-rn-badge">RN</span>
+    <span>About Aplikasi</span>
   </div>
 </div>
 
@@ -1579,12 +1612,12 @@ function fmt(v, decimals = 0) {
 
   <!-- COLUMN SELECTOR -->
   <div id="colSelector" class="col-selector">
-    <div class="col-selector-title">PILIH KOLOM YANG AKAN DIISI NILAI</div>
+    <div class="col-selector-title">PILIH KOLOM YANG DITAMPILKAN / DIISI NILAI</div>
     <div id="colChips" class="col-chips"></div>
-    <div style="margin-top: 10px; display: flex; gap: 8px;">
-      <button class="btn small" onclick="selectAllCols()">Pilih Semua TP</button>
-      <button class="btn vr46 small" onclick="selectCols(['STS'])">Hanya STS</button>
-      <button class="btn osis small" onclick="selectCols(['SAS'])">Hanya SAS</button>
+    <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+      <button class="btn small" onclick="selectAllCols()">Pilih Semua Kolom</button>
+      <button class="btn vr46 small" onclick="selectDefaultCols()">Reset Default</button>
+      <button class="btn osis small" onclick="selectCols(['STS','SAS','NA','RAPOR','RANK'])">Hanya Sumatif + Hasil</button>
       <button class="btn ghost small" onclick="clearCols()">Kosongkan</button>
     </div>
   </div>
@@ -1613,79 +1646,53 @@ function fmt(v, decimals = 0) {
 </div>
 
 <!-- =========================
-     MODAL: ABOUT / FOOTER POPUP
+     MODAL: ABOUT / FOOTER POPUP (SIMPEL)
      ========================= -->
 <div id="aboutModal" class="modal">
   <div class="modal-card">
     <button class="modal-close" onclick="hideModal('aboutModal')" aria-label="Tutup">×</button>
-    <div class="about-content">
+    <div class="about-simple">
 
-      <!-- HERO: gradient biru + logo -->
-      <div class="about-hero">
-        <img src="https://apxid.github.io/sireva/assets/rn.png" alt="Rekap Nilai Informatika" class="about-logo img-mode" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><rect width=%22120%22 height=%22120%22 fill=%22%23fff%22 rx=%2218%22/><text x=%2260%22 y=%2275%22 text-anchor=%22middle%22 font-family=%22Times New Roman%22 font-size=%2252%22 font-weight=%22bold%22 fill=%22%231d4ed8%22>RN</text></svg>'">
-        <div class="about-title">Rekap Nilai Informatika</div>
-        <div class="about-subtitle">Sistem Penilaian Siswa SMP Berbasis Google Apps Script</div>
+      <!-- Logo -->
+      <img src="https://apxid.github.io/sireva/assets/rn.png" alt="Rekap Nilai Informatika" class="about-logo img-mode" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><rect width=%22120%22 height=%22120%22 fill=%22%23fff%22 rx=%2218%22/><text x=%2260%22 y=%2275%22 text-anchor=%22middle%22 font-family=%22Times New Roman%22 font-size=%2252%22 font-weight=%22bold%22 fill=%22%231d4ed8%22>RN</text></svg>'">
+
+      <!-- Nama Aplikasi -->
+      <div class="about-name">Rekap Nilai Informatika</div>
+
+      <!-- Jeda space (garis tri-warna) -->
+      <div class="about-spacer"></div>
+
+      <!-- Developer -->
+      <div class="about-meta">
+        <span class="label">Dev by</span>
+        <span class="value">mb</span>
       </div>
 
-      <div class="about-body">
-
-        <!-- INFO APLIKASI -->
-        <div class="about-section-title">Informasi Aplikasi</div>
-        <div class="about-info">
-          <div class="row"><span class="key">Nama Aplikasi</span><span class="val">Rekap Nilai Informatika</span></div>
-          <div class="row"><span class="key">Versi</span><span class="val accent">1.1.0</span></div>
-          <div class="row"><span class="key">Build</span><span class="val">14 Oktober 2026</span></div>
-          <div class="row"><span class="key">Platform</span><span class="val">Google Apps Script + HTML</span></div>
-          <div class="row"><span class="key">Lisensi</span><span class="val">Edukasi - Bebas Digunakan</span></div>
-        </div>
-
-        <!-- LEGENDA WARNA NILAI -->
-        <div class="about-section-title">Indikator Warna Nilai</div>
-        <div class="about-legend">
-          <div class="legend-row">
-            <span class="swatch below"></span>
-            <span>Nilai &lt; 78</span>
-            <span class="desc">Belum Tuntas</span>
-          </div>
-          <div class="legend-row">
-            <span class="swatch equal"></span>
-            <span>Nilai = 78</span>
-            <span class="desc">Batas Tuntas (KKTP)</span>
-          </div>
-          <div class="legend-row">
-            <span class="swatch above"></span>
-            <span>Nilai &gt; 78</span>
-            <span class="desc">Tuntas</span>
-          </div>
-        </div>
-
-        <!-- DOWNLOAD CTA -->
-        <div class="about-download">
-          <div class="about-download-title"> Unduh Aplikasi</div>
-          <div class="about-download-sub">Dapatkan source code &amp; template spreadsheet</div>
-          <a href="https://lynk.id/mb_dprint" target="_blank" rel="noopener noreferrer" class="about-download-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 3v12"/>
-              <path d="m7 10 5 5 5-5"/>
-              <path d="M5 21h14"/>
-            </svg>
-            <span>lynk.id/mb_dprint</span>
-          </a>
-          <span class="about-download-link">https://lynk.id/mb_dprint</span>
-        </div>
-
-        <!-- CREDIT -->
-        <div class="about-credit">
-          Dev by <span class="heart">♥</span> <strong>mb</strong>
-          <div class="about-version">© 2026 Rekap Nilai Informatika · All Rights Reserved</div>
-        </div>
-
-        <!-- TOMBOL TUTUP EKSPLISIT - besar, jelas, gampang diklik -->
-        <button class="btn ghost" onclick="hideModal('aboutModal')" style="width: 100%; margin-top: 14px; padding: 11px; font-size: 13px; justify-content: center;">
-          ✕ Tutup
-        </button>
-
+      <!-- Build -->
+      <div class="about-meta">
+        <span class="label">Build</span>
+        <span class="value">14 Oktober 2026</span>
       </div>
+
+      <!-- Versi -->
+      <div class="about-meta">
+        <span class="label">Versi</span>
+        <span class="value">1.2.0</span>
+      </div>
+
+      <!-- Link Download -->
+      <a href="https://lynk.id/mb_dprint" target="_blank" rel="noopener noreferrer" class="about-download-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v12"/>
+          <path d="m7 10 5 5 5-5"/>
+          <path d="M5 21h14"/>
+        </svg>
+        <span>Unduh Aplikasi</span>
+      </a>
+
+      <!-- Tombol Tutup -->
+      <button class="about-close-btn" onclick="hideModal('aboutModal')">✕ Tutup</button>
+
     </div>
   </div>
 </div>
@@ -1909,6 +1916,7 @@ async function doLogin() {
       setTimeout(() => {
         document.getElementById('loginLayer').classList.add('hidden');
         document.getElementById('appLayer').classList.add('active');
+        document.body.classList.add('app-mode');
         initApp();
       }, 600);
     } else {
@@ -1939,6 +1947,7 @@ function doLogout() {
   }
   document.getElementById('loginLayer').classList.remove('hidden');
   document.getElementById('appLayer').classList.remove('active');
+  document.body.classList.remove('app-mode');
   document.getElementById('loginUsername').value = '';
   document.getElementById('loginPassword').value = '';
   document.getElementById('btnLogin').disabled = false;
@@ -2032,7 +2041,9 @@ async function loadKelas(kelasName) {
       document.getElementById('printMapel').textContent = 'MATA PELAJARAN : ' + (res.mapel || 'INFORMATIKA');
       document.getElementById('printKktp').textContent = 'KKTP : ' + cfg.kktp + ' | NILAI TERENDAH : ' + cfg.nilai_terendah + ' | NILAI TERTINGGI : ' + cfg.nilai_tertinggi;
 
-      // Default selected cols: TP1_LM1 ... TP4_LM5
+      // Default selected cols (Mode Input ringkas):
+      // TP1_LM1 ... TP4_LM5 (20) + STS + SAS (input) + NA + RAPOR + RANK (hasil akhir).
+      // LM per-LM, 30% LM Total, 30% STS, 40% SAS TIDAK default - user pilih manual kalau mau lihat.
       if (selectedCols.size === 0) {
         const defaultCols = [];
         for (let lm = 1; lm <= 5; lm++) {
@@ -2040,7 +2051,7 @@ async function loadKelas(kelasName) {
             defaultCols.push('TP' + tp + '_LM' + lm);
           }
         }
-        defaultCols.push('STS', 'SAS');
+        defaultCols.push('STS', 'SAS', 'NA', 'RAPOR', 'RANK');
         selectedCols = new Set(defaultCols);
       }
       renderColChips();
@@ -2057,24 +2068,65 @@ async function loadKelas(kelasName) {
 }
 
 // === RENDER COLUMN CHIPS ===
-function renderColChips() {
-  const chips = document.getElementById('colChips');
+// Daftar SEMUA kolom yang bisa dipilih user di Mode Input.
+// Disusun berkelompok supaya user gampang cari:
+//   1. TP (5 LM x 4 TP = 20 chips)
+//   2. LM per-LM + 30% LM Total (6 chips, computed - read-only)
+//   3. Sumatif: STS + 30% STS + SAS + 40% SAS (4 chips, 2 input + 2 computed)
+//   4. Hasil akhir: NA + NILAI RAPOR + RANK (3 chips, computed)
+// User bebas centang/uncentang SEMUA kolom.
+function getAllColDefs() {
   const cols = [];
+  // Group 1: TP (input)
   for (let lm = 1; lm <= 5; lm++) {
     for (let tp = 1; tp <= 4; tp++) {
       cols.push({ key: 'TP' + tp + '_LM' + lm, label: 'TP' + tp + ' LM' + lm, group: 'tp' });
     }
   }
-  cols.push({ key: 'STS', label: 'STS (Sumatif Tengah)', group: 'sts' });
-  cols.push({ key: 'SAS', label: 'SAS (Sumatif Akhir)', group: 'sas' });
+  // Group 2: LM per-LM (computed) + 30% LM Total
+  for (let lm = 1; lm <= 5; lm++) {
+    cols.push({ key: 'LM' + lm, label: 'LM' + lm + ' (rata-rata)', group: 'lm' });
+  }
+  cols.push({ key: 'LM_TOTAL', label: '30% LM Total', group: 'lm' });
+  // Group 3: Sumatif
+  cols.push({ key: 'STS', label: 'STS (Sumatif Tengah)', group: 'sumatif' });
+  cols.push({ key: 'STS_PCT', label: '30% STS', group: 'sumatif' });
+  cols.push({ key: 'SAS', label: 'SAS (Sumatif Akhir)', group: 'sumatif' });
+  cols.push({ key: 'SAS_PCT', label: '40% SAS', group: 'sumatif' });
+  // Group 4: Hasil
+  cols.push({ key: 'NA', label: 'NA (Nilai Akhir)', group: 'hasil' });
+  cols.push({ key: 'RAPOR', label: 'NILAI RAPOR', group: 'hasil' });
+  cols.push({ key: 'RANK', label: 'RANK', group: 'hasil' });
+  return cols;
+}
 
-  chips.innerHTML = cols.map(c => {
+function renderColChips() {
+  const chips = document.getElementById('colChips');
+  const cols = getAllColDefs();
+  // Daftar semua key untuk tombol "Pilih Semua Kolom"
+  window._allColKeys = cols.map(c => c.key);
+
+  // Render chips dengan label group sebagai pemisah visual
+  let html = '';
+  let lastGroup = '';
+  const groupLabel = {
+    tp:       'FORMATIF - Tujuan Pembelajaran (input)',
+    lm:       'Rata-rata Lingkup Materi (computed)',
+    sumatif:  'SUMATIF (input + computed)',
+    hasil:    'Hasil Akhir (computed)'
+  };
+  cols.forEach(c => {
+    if (c.group !== lastGroup) {
+      html += '<div class="col-chip-group">' + groupLabel[c.group] + '</div>';
+      lastGroup = c.group;
+    }
     const active = selectedCols.has(c.key);
-    return `<div class="col-chip ${active?'active':''}" onclick="toggleCol('${c.key}')">
+    html += `<div class="col-chip ${active?'active':''}" onclick="toggleCol('${c.key}')">
       <span class="check"></span>
       <span>${c.label}</span>
     </div>`;
-  }).join('');
+  });
+  chips.innerHTML = html;
 }
 
 function toggleCol(key) {
@@ -2084,7 +2136,25 @@ function toggleCol(key) {
   renderTable();
 }
 function selectAllCols() {
-  for (let lm = 1; lm <= 5; lm++) for (let tp = 1; tp <= 4; tp++) selectedCols.add('TP'+tp+'_LM'+lm);
+  // Pilih SEMUA kolom: TP + LM + LM_TOTAL + STS + STS_PCT + SAS + SAS_PCT + NA + RAPOR + RANK
+  if (!window._allColKeys) renderColChips();
+  window._allColKeys.forEach(k => selectedCols.add(k));
+  renderColChips(); renderTable();
+}
+// Default ringkas: TP semua (20) + STS + SAS + NA + RAPOR + RANK = 25 chips.
+// Tidak include LM per-LM, LM_TOTAL, STS_PCT, SAS_PCT - biar Mode Input tetap ringkas.
+function selectDefaultCols() {
+  selectedCols = new Set();
+  for (let lm = 1; lm <= 5; lm++) {
+    for (let tp = 1; tp <= 4; tp++) {
+      selectedCols.add('TP' + tp + '_LM' + lm);
+    }
+  }
+  selectedCols.add('STS');
+  selectedCols.add('SAS');
+  selectedCols.add('NA');
+  selectedCols.add('RAPOR');
+  selectedCols.add('RANK');
   renderColChips(); renderTable();
 }
 function selectCols(arr) {
@@ -2126,22 +2196,23 @@ function renderTable() {
     }
   }
 
-  // === Visibility flags ===
-  // Permintaan user: "jika pilih TP1, hanya tampilkan TP1, NA, Rank".
-  // Artinya di Mode Input:
-  //   - LM per-LM (W-AA)        -> SENDERHINYA disembunyikan (redundan di Mode Input)
-  //   - 30% LM Total            -> SENDERHINYA disembunyikan
-  //   - STS & 30% STS           -> tampil HANYA jika STS dipilih
-  //   - SAS & 40% SAS           -> tampil HANYA jika SAS dipilih
-  //   - NA, Rapor, Rank         -> SELALU tampil (hasil akhir)
-  // Mode Full: SEMUA tampil.
-  const showLM        = isFull; // LM1..LM5
-  const showLMTotal   = isFull; // 30% LM Total
+  // === Visibility flags - semua kolom bisa dikontrol via selectedCols ===
+  // User sekarang bisa pilih SEMUA kolom: TP, LM, LM_TOTAL, STS, STS_PCT,
+  // SAS, SAS_PCT, NA, RAPOR, RANK. Tidak ada yang "selalu tampil".
+  // Mode Full: SEMUA kolom tampil (ignore pilihan user).
+  const showLM0       = isFull; // untuk flag individual LM (LMTotal pakai LM_TOTAL)
+  const showLM        = []; // showLM[0..4] untuk LM1..LM5
+  for (let i = 1; i <= 5; i++) showLM[i-1] = isFull || selectedCols.has('LM' + i);
+  const showLMTotal   = isFull || selectedCols.has('LM_TOTAL');
   const showSTS       = isFull || selectedCols.has('STS');
-  const showSTSPct    = isFull || showSTS;
+  const showSTSPct    = isFull || selectedCols.has('STS_PCT');
   const showSAS       = isFull || selectedCols.has('SAS');
-  const showSASPct    = isFull || showSAS;
-  // NA, Rapor, Rank selalu true
+  const showSASPct    = isFull || selectedCols.has('SAS_PCT');
+  const showNA        = isFull || selectedCols.has('NA');
+  const showRapor     = isFull || selectedCols.has('RAPOR');
+  const showRank      = isFull || selectedCols.has('RANK');
+  // Hitung berapa LM yang visible - untuk colspan header SUMATIF LINGKUP MATERI
+  const showAnyLM = showLM.some(Boolean);
 
   // Hitung jumlah TP per LM (untuk colspan di Row 2)
   const tpCountPerLM = [0, 0, 0, 0, 0]; // index 0 = LM1, dst
@@ -2162,7 +2233,14 @@ function renderTable() {
 
   // === Tampilkan / sembunyikan banner "tidak ada kolom dipilih" ===
   const banner = document.getElementById('emptyBanner');
-  if (!isFull && visibleTPs.length === 0 && !showSTS && !showSAS) {
+  // Banner muncul jika tidak ada SATU PUN kolom yang dipilih di Mode Input.
+  const anyVisible = isFull
+    || visibleTPs.length > 0
+    || showAnyLM || showLMTotal
+    || showSTS || showSTSPct
+    || showSAS || showSASPct
+    || showNA || showRapor || showRank;
+  if (!anyVisible) {
     banner.classList.add('show');
   } else {
     banner.classList.remove('show');
@@ -2179,8 +2257,10 @@ function renderTable() {
       : 'FORMATIF (' + visibleTPs.length + ' TP terpilih)';
     html += '<th colspan="' + visibleTPs.length + '" class="lm-header">' + tpLabel + '</th>';
   }
-  if (showLM) {
-    html += '<th colspan="5" class="lm-header">SUMATIF LINGKUP MATERI</th>';
+  if (showAnyLM) {
+    // Hitung jumlah LM yang visible (untuk colspan header SUMATIF LINGKUP MATERI)
+    const lmVisibleCount = showLM.filter(Boolean).length;
+    html += '<th colspan="' + lmVisibleCount + '" class="lm-header">SUMATIF LINGKUP MATERI</th>';
   }
   if (showLMTotal) {
     html += '<th rowspan="3" class="result-header comp-col">30% LM TOTAL</th>';
@@ -2197,9 +2277,15 @@ function renderTable() {
   if (showSASPct) {
     html += '<th rowspan="3" class="sts-header comp-col">40% SAS</th>';
   }
-  html += '<th rowspan="3" class="result-header na-col">NA</th>';
-  html += '<th rowspan="3" class="result-header rapor-col">NILAI RAPOR</th>';
-  html += '<th rowspan="3" class="result-header rank-col">RANK</th>';
+  if (showNA) {
+    html += '<th rowspan="3" class="result-header na-col">NA</th>';
+  }
+  if (showRapor) {
+    html += '<th rowspan="3" class="result-header rapor-col">NILAI RAPOR</th>';
+  }
+  if (showRank) {
+    html += '<th rowspan="3" class="result-header rank-col">RANK</th>';
+  }
   html += '</tr>';
 
   // Row 2: LM names - colspan menyesuaikan jumlah TP terlihat per LM
@@ -2210,8 +2296,9 @@ function renderTable() {
       html += '<th colspan="' + count + '" class="lm-header">Lingkup Materi ' + lm + '</th>';
     }
   }
-  if (showLM) {
-    for (let lm = 1; lm <= 5; lm++) {
+  // LM1-LM5 header cells - hanya yang visible
+  for (let lm = 1; lm <= 5; lm++) {
+    if (showLM[lm - 1]) {
       html += '<th class="lm-header lm-col">LM' + lm + '</th>';
     }
   }
@@ -2257,9 +2344,9 @@ function renderTable() {
       row += '<td class="tp-col' + (gc ? ' ' + gc : '') + '"><input type="number" min="0" max="100" class="cell-input" data-row="' + s.row + '" data-col="' + t.key + '" value="' + val + '" onfocus="this.select()" onchange="onCellEdit(this)"></td>';
     });
 
-    // LM1-LM5 (W-AA) - 5 cols - tampil HANYA di mode 'full'
-    if (showLM) {
-      for (let lm = 0; lm < 5; lm++) {
+    // LM1-LM5 (W-AA) - 5 cols - tampil HANYA jika LM tersebut dipilih (atau mode full)
+    for (let lm = 0; lm < 5; lm++) {
+      if (showLM[lm]) {
         const v = s.lm[lm];
         const gc = gradeClass(v);
         row += '<td class="computed lm lm-col' + (gc ? ' ' + gc : '') + '">' + fmt(v, 1) + '</td>';
@@ -2298,20 +2385,22 @@ function renderTable() {
       row += '<td class="computed sts comp-col' + (gc ? ' ' + gc : '') + '">' + fmt(v, 1) + '</td>';
     }
 
-    // NA (selalu tampil)
-    {
+    // NA (tampil HANYA jika dipilih / mode full)
+    if (showNA) {
       const v = s.na;
       const gc = gradeClass(v);
       row += '<td class="computed na na-col' + (gc ? ' ' + gc : '') + '">' + fmt(v, 1) + '</td>';
     }
-    // Rapor (selalu tampil)
-    {
+    // Rapor (tampil HANYA jika dipilih / mode full)
+    if (showRapor) {
       const v = s.rapor;
       const gc = gradeClass(v);
       row += '<td class="computed rapor rapor-col' + (gc ? ' ' + gc : '') + '">' + fmt(v) + '</td>';
     }
-    // Rank (selalu tampil - TIDAK diberi warna karena bukan nilai 0-100)
-    row += '<td class="computed rank rank-col">' + (s.rank || '') + '</td>';
+    // Rank (tampil HANYA jika dipilih / mode full)
+    if (showRank) {
+      row += '<td class="computed rank rank-col">' + (s.rank || '') + '</td>';
+    }
 
     row += '</tr>';
     return row;
@@ -2795,6 +2884,7 @@ async function checkFirstRun() {
     // Session valid - masuk app langsung
     document.getElementById('loginLayer').classList.add('hidden');
     document.getElementById('appLayer').classList.add('active');
+    document.body.classList.add('app-mode');
     initApp();
   } else {
     // Tidak ada session - tampilkan login
