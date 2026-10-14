@@ -770,9 +770,10 @@ table.grade-table {
 .grade-table .col-hidden { display: none; }
 
 /* === Color rules untuk cell nilai ===
-   < 78  -> merah (belum tuntas)
-   = 78  -> kuning (batas tuntas / KKTP default)
-   > 78  -> hijau (tuntas)
+   Threshold: KKTP (dari sheet config, fallback 78).
+   value < KKTP -> merah (belum tuntas)
+   value = KKTP -> kuning (batas tuntas / KKTP)
+   value > KKTP -> hijau (tuntas)
    Aturan diterapkan ke tdNilai (td berisi input ATAU td.computed).
    Untuk input cell, warna teks juga diubah supaya kontras.
    Catatan: aturan TIDAK berlaku untuk kolom Rank (bukan nilai 0-100).
@@ -1146,7 +1147,7 @@ body:not(.app-mode) .app-footer { display: none; }
   border-radius: 3px;
 }
 
-/* About popup - SIMPEL & RINGKAS (versi 1.2.0) */
+/* About popup - SIMPEL & RINGKAS (versi 1.3.0) */
 #aboutModal .modal-card {
   background: #ffffff;
   border-radius: 16px;
@@ -1156,51 +1157,40 @@ body:not(.app-mode) .app-footer { display: none; }
   box-shadow: 0 24px 60px rgba(15,23,42,.18), 0 0 0 1px rgba(15,23,42,.04);
   position: relative;
 }
-/* Tombol close × di pojok - TAMPIL JELAS di atas hero */
+/* Tombol close × di pojok kanan atas DIHAPUR - user pakai tombol Tutup di bawah.
+   Aturan CSS .modal-close di bawah akan hide selector tesebut untuk #aboutModal. */
 #aboutModal .modal-close {
-  position: absolute;
-  top: 12px; right: 12px;
-  width: 32px; height: 32px;
-  background: rgba(255,255,255,.96);
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 20px;
-  color: #1e3a8a;
-  display: flex; align-items: center; justify-content: center;
-  transition: all .2s;
-  z-index: 10;
-  box-shadow: 0 4px 12px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.05);
-  font-weight: 700;
-  line-height: 1;
-}
-#aboutModal .modal-close:hover {
-  background: #dc2626;
-  color: #fff;
-  transform: rotate(90deg);
+  display: none !important;
 }
 
-/* Layout simpel - semua elemen vertikal, text-align center */
+/* Layout simpel - semua elemen vertikal, logo & download centered, info rata kiri */
 .about-simple {
   padding: 28px 24px 22px;
   text-align: center;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center;  /* center elemen block (logo, tombol) */
   gap: 0;
 }
-/* Logo: gambar dari URL, putih, rounded */
+/* Logo: gambar dari URL, rasio AUTO (tidak persegi) - object-fit: contain supaya
+   gambar apa pun ( persegi / landscape / portrait ) muat tanpa distorsi.
+   Container pakai max-width & max-height, dengan width/height auto. */
 .about-logo {
-  width: 80px; height: 80px;
+  max-width: 200px;       /* max-width supaya tidak melebihi card */
+  max-height: 90px;      /* max-height supaya card tidak terlalu tinggi */
+  width: auto;
+  height: auto;
   margin: 0 0 14px;
   background: #fff;
   border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  display: flex; align-items: center; justify-content: center;
+  border-radius: 12px;
+  /* Hapus layout flex center supaya rasio img natural terjaga */
+  display: block;
   overflow: hidden;
   box-shadow: 0 6px 16px rgba(15,23,42,.1);
   object-fit: contain;
-  padding: 8px;
+  padding: 6px 10px;     /* padding supaya ada napas di sekitar logo */
+  box-sizing: border-box;
 }
 .about-logo.img-mode { font-size: 0; }
 /* Nama aplikasi */
@@ -1219,14 +1209,26 @@ body:not(.app-mode) .app-footer { display: none; }
   border-radius: 3px;
   margin: 10px 0 14px;
 }
-/* Info compact (developer / build / versi) - 3 baris kecil */
+/* Block info rata KIRI (sebelumnya center) - dibungkus container */
+.about-meta-block {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  margin: 0 0 4px;
+}
+/* Info compact (developer / build / versi) - 3 baris, rata kiri, label fixed-width */
 .about-meta {
   font-size: 12px;
   color: #475569;
   margin: 0 0 4px;
   display: flex;
-  align-items: center;
-  gap: 6px;
+  align-items: baseline;  /* label & value sejajar di baseline */
+  gap: 8px;
+  width: 100%;
+  justify-content: flex-start;
 }
 .about-meta .label {
   color: #94a3b8;
@@ -1234,10 +1236,19 @@ body:not(.app-mode) .app-footer { display: none; }
   text-transform: uppercase;
   font-size: 10px;
   letter-spacing: .5px;
+  /* Label fixed-width supaya value semua rapi sejajar (mis. "Dev by", "Build  ", "Versi ") */
+  min-width: 56px;
+  flex-shrink: 0;
+}
+.about-meta .sep {
+  color: #cbd5e1;
+  font-weight: 600;
+  flex-shrink: 0;
 }
 .about-meta .value {
   color: #1d4ed8;
   font-weight: 700;
+  text-align: left;
 }
 /* Link download - tombol simple */
 .about-download-btn {
@@ -1650,11 +1661,10 @@ function fmt(v, decimals = 0) {
      ========================= -->
 <div id="aboutModal" class="modal">
   <div class="modal-card">
-    <button class="modal-close" onclick="hideModal('aboutModal')" aria-label="Tutup">×</button>
     <div class="about-simple">
 
-      <!-- Logo -->
-      <img src="https://apxid.github.io/sireva/assets/rn.png" alt="Rekap Nilai Informatika" class="about-logo img-mode" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><rect width=%22120%22 height=%22120%22 fill=%22%23fff%22 rx=%2218%22/><text x=%2260%22 y=%2275%22 text-anchor=%22middle%22 font-family=%22Times New Roman%22 font-size=%2252%22 font-weight=%22bold%22 fill=%22%231d4ed8%22>RN</text></svg>'">
+      <!-- Logo SIREVA - rasio bebas (tidak persegi) -->
+      <img src="https://apxid.github.io/sireva/assets/sireva.png" alt="SIREVA - Sistem Rekap Nilai Informatika" class="about-logo img-mode" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22180%22 height=%2280%22><rect width=%22180%22 height=%2280%22 fill=%22%23fff%22 rx=%2212%22/><text x=%2290%22 y=%2248%22 text-anchor=%22middle%22 font-family=%22Times New Roman%22 font-size=%2232%22 font-weight=%22bold%22 fill=%22%231d4ed8%22>SIREVA</text></svg>'">
 
       <!-- Nama Aplikasi -->
       <div class="about-name">Rekap Nilai Informatika</div>
@@ -1662,22 +1672,17 @@ function fmt(v, decimals = 0) {
       <!-- Jeda space (garis tri-warna) -->
       <div class="about-spacer"></div>
 
-      <!-- Developer -->
-      <div class="about-meta">
-        <span class="label">Dev by</span>
-        <span class="value">mb</span>
-      </div>
-
-      <!-- Build -->
-      <div class="about-meta">
-        <span class="label">Build</span>
-        <span class="value">14 Oktober 2026</span>
-      </div>
-
-      <!-- Versi -->
-      <div class="about-meta">
-        <span class="label">Versi</span>
-        <span class="value">1.2.0</span>
+      <!-- Block info rata KIRI (bukan tengah) -->
+      <div class="about-meta-block">
+        <div class="about-meta">
+          <span class="label">Dev by</span><span class="sep">:</span><span class="value">mb</span>
+        </div>
+        <div class="about-meta">
+          <span class="label">Build</span><span class="sep">:</span><span class="value">14 Oktober 2026</span>
+        </div>
+        <div class="about-meta">
+          <span class="label">Versi</span><span class="sep">:</span><span class="value">1.3.0</span>
+        </div>
       </div>
 
       <!-- Link Download -->
@@ -1841,6 +1846,7 @@ function fmt(v, decimals = 0) {
 
     <div style="display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap;">
       <button class="btn" onclick="saveKelasInfo()" style="flex: 1; min-width: 120px;">SIMPAN INFO</button>
+      <button class="btn vr46" onclick="applyCFNow()">🎨 Warna Cell Otomatis</button>
       <button class="btn danger" onclick="confirmDeleteKelas()">HAPUS KELAS</button>
       <button class="btn ghost" onclick="hideModal('kelasInfoModal')">Tutup</button>
     </div>
@@ -2319,15 +2325,18 @@ function renderTable() {
 
   // === BODY ===
   // Helper: beri atribut data-grade untuk CSS warna cell (merah/kuning/hijau)
-  //   value < 78 -> "below"
-  //   value = 78 -> "equal"
-  //   value > 78 -> "above"
+  //   value < KKTP -> "below" (merah, belum tuntas)
+  //   value = KKTP -> "equal" (kuning, batas tuntas)
+  //   value > KKTP -> "above" (hijau, tuntas)
   //   value kosong -> tanpa kelas
+  // KKTP dibaca dari kelasData.config.kktp (dari sheet config Google Sheets).
+  // Fallback ke 78 kalau config belum dimuat / tidak ada.
+  const CF_THRESHOLD = getCFThreshold();
   function gradeClass(v) {
     if (v === '' || v === null || v === undefined || isNaN(v)) return '';
     const n = Number(v);
-    if (n < 78) return 'cell-below';
-    if (n === 78) return 'cell-equal';
+    if (n < CF_THRESHOLD) return 'cell-below';
+    if (n === CF_THRESHOLD) return 'cell-equal';
     return 'cell-above';
   }
 
@@ -2416,20 +2425,34 @@ function renderTable() {
   applyCellColors();
 }
 
+// === Helper: dapatkan threshold KKTP untuk aturan warna cell ===
+// KKTP dibaca dari kelasData.config.kktp (yang dimuat dari sheet config Google Sheets).
+// Fallback ke 75 kalau config belum dimuat / tidak ada / invalid.
+// (75 = default KKTP di getConfig() GAS; konsisten antara spreadsheet ↔ aplikasi web).
+// Dipakai oleh gradeClass() di renderTable() dan applyCellColors().
+function getCFThreshold() {
+  if (kelasData && kelasData.config && kelasData.config.kktp !== undefined && kelasData.config.kktp !== null) {
+    const n = Number(kelasData.config.kktp);
+    if (!isNaN(n)) return n;
+  }
+  return 75; // fallback default (sama dengan getConfig GAS default)
+}
+
 // === APPLY CELL COLORS - terapkan warna ke semua td nilai ===
 // Dipanggil setelah renderTable() selesai, dan setelah refreshComputedCells()
 // untuk update sel computed yang nilainya baru dihitung ulang oleh backend.
 //
-// Aturan:
-//   value < 78 -> cell-below (merah)
-//   value = 78 -> cell-equal (kuning)
-//   value > 78 -> cell-above (hijau)
+// Aturan (threshold = KKTP dari sheet config, fallback 78):
+//   value < KKTP -> cell-below (merah)
+//   value = KKTP -> cell-equal (kuning)
+//   value > KKTP -> cell-above (hijau)
 //   value kosong -> hapus semua kelas warna
 //
 // Tidak berlaku untuk td.no, td.nama, td.rank (bukan nilai 0-100).
 function applyCellColors() {
   const body = document.getElementById('tableBody');
   if (!body) return;
+  const threshold = getCFThreshold();
   // Iterasi semua td yang ada di body - cek apakah punya input.cell-input ATAU
   // punya kelas 'computed' (kecuali 'rank' karena itu ranking, bukan nilai).
   const tds = body.querySelectorAll('td');
@@ -2451,8 +2474,8 @@ function applyCellColors() {
     if (val === '' || val === null || val === undefined) return;
     const n = Number(val);
     if (isNaN(n)) return;
-    if (n < 78) td.classList.add('cell-below');
-    else if (n === 78) td.classList.add('cell-equal');
+    if (n < threshold) td.classList.add('cell-below');
+    else if (n === threshold) td.classList.add('cell-equal');
     else td.classList.add('cell-above');
   });
 }
@@ -2485,8 +2508,9 @@ async function onCellEdit(input) {
     tdParent.classList.remove('cell-below', 'cell-equal', 'cell-above');
     if (value !== '' && !isNaN(value)) {
       const n = Number(value);
-      if (n < 78) tdParent.classList.add('cell-below');
-      else if (n === 78) tdParent.classList.add('cell-equal');
+      const threshold = getCFThreshold();
+      if (n < threshold) tdParent.classList.add('cell-below');
+      else if (n === threshold) tdParent.classList.add('cell-equal');
       else tdParent.classList.add('cell-above');
     }
   }
@@ -2759,6 +2783,41 @@ async function saveKelasInfo() {
     }
   } catch (err) {
     toast('Error: ' + err.message, 'err');
+  } finally {
+    hideLoading();
+  }
+}
+
+// === APPLY CONDITIONAL FORMATTING ke spreadsheet (warna cell otomatis) ===
+// Trigger API GAS untuk apply CF rules ke range C:AH di sheet kelas aktif.
+// Berguna untuk kelas LAMA yang dibuat sebelum fitur CF ini ditambahkan ke GAS.
+// Setelah CF terpasang, Google Sheets akan otomatis warna cell saat nilai diubah
+// (tidak perlu re-apply setiap saveNilai - tapi auto-apply juga sudah ada di saveNilai).
+async function applyCFNow() {
+  if (!activeKelas) { toast('Pilih kelas dulu', 'info'); return; }
+  showLoading('Memasang conditional formatting ke ' + activeKelas + '...');
+  try {
+    const res = await apiCall('applyCF', {}, 'POST', { kelas: activeKelas });
+    if (res.success) {
+      // Sukses - tampilkan info range, KKTP, dan jumlah rules yang terpasang
+      const dbg = res.debug || {};
+      const extra = dbg.numRulesVerified !== undefined
+        ? ' (verifikasi: ' + dbg.numRulesVerified + ' rules terpasang di sheet)'
+        : '';
+      toast(res.message + extra, 'ok', 5500);
+      console.log('[applyCF] Sukses:', res);
+    } else {
+      // Gagal - tampilkan pesan error + debug info di console
+      toast(res.message || 'Gagal apply CF', 'err', 5500);
+      console.error('[applyCF] Gagal:', res);
+      // Hint solusi
+      if (res.debug && res.debug.error) {
+        console.error('[applyCF] Detail error:', res.debug.error);
+      }
+    }
+  } catch (err) {
+    toast('Error koneksi: ' + err.message + '. Pastikan GAS sudah di-deploy ulang.', 'err', 5500);
+    console.error('[applyCF] Exception:', err);
   } finally {
     hideLoading();
   }
