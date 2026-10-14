@@ -561,31 +561,65 @@ table.grade-table {
 /* === Kolom TP (FORMATIF): lebar 55px, cukup untuk angka 0-100 === */
 .grade-table th.tp-col,
 .grade-table td.tp-col {
-  width: 55px;
-  min-width: 55px;
-  max-width: 55px;
-}
-
-/* === Kolom LM (W-AA): lebar 55px === */
-.grade-table th.lm-col,
-.grade-table td.lm-col {
-  width: 55px;
-  min-width: 55px;
-  max-width: 55px;
-}
-
-/* === Kolom computed (AB, AD, AF): 60px === */
-.grade-table th.comp-col,
-.grade-table td.comp-col {
   width: 60px;
   min-width: 60px;
   max-width: 60px;
 }
 
+/* === Kolom LM (W-AA): lebar 60px === */
+.grade-table th.lm-col,
+.grade-table td.lm-col {
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+}
+
+/* === Kolom computed (AB, AD, AF): 64px === */
+.grade-table th.comp-col,
+.grade-table td.comp-col {
+  width: 64px;
+  min-width: 64px;
+  max-width: 64px;
+}
+
 /* === Kolom NA / Rapor / Rank === */
-.grade-table th.na-col, .grade-table td.na-col { width: 55px; }
-.grade-table th.rapor-col, .grade-table td.rapor-col { width: 70px; }
-.grade-table th.rank-col, .grade-table td.rank-col { width: 50px; }
+.grade-table th.na-col, .grade-table td.na-col { width: 56px; min-width: 56px; max-width: 56px; }
+.grade-table th.rapor-col, .grade-table td.rapor-col { width: 78px; min-width: 78px; max-width: 78px; }
+.grade-table th.rank-col, .grade-table td.rank-col { width: 52px; min-width: 52px; max-width: 52px; }
+
+/* === Lebar TP dinamis berdasarkan jumlah kolom terlihat ===
+   Saat user hanya memilih sedikit TP, lebarkan kolom supaya muat angka & input nyaman.
+   Saat banyak TP, kecilkan ke 55px supaya tidak terlalu melebar horizontal. */
+.grade-table.cols-few th.tp-col,
+.grade-table.cols-few td.tp-col {
+  width: 110px; min-width: 110px; max-width: 110px;
+}
+.grade-table.cols-some th.tp-col,
+.grade-table.cols-some td.tp-col {
+  width: 80px; min-width: 80px; max-width: 80px;
+}
+.grade-table.cols-many th.tp-col,
+.grade-table.cols-many td.tp-col {
+  width: 55px; min-width: 55px; max-width: 55px;
+}
+
+/* Input angka di kolom TP - besar & jelas saat kolom sedikit */
+.grade-table.cols-few input.cell-input { font-size: 15px; padding: 7px 4px; }
+.grade-table.cols-some input.cell-input { font-size: 13px; padding: 5px 3px; }
+.grade-table.cols-many input.cell-input { font-size: 12px; padding: 4px 2px; }
+
+/* === Banner "tidak ada kolom dipilih" === */
+.empty-cols-banner {
+  background: linear-gradient(135deg, #fef9c3, #fef08a);
+  border: 2px dashed var(--osis);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--blue-dark);
+  display: none;
+}
+.empty-cols-banner.show { display: block; animation: slideDown .3s ease; }
 
 .grade-table input.cell-input {
   width: 100%;
@@ -1005,11 +1039,89 @@ table.grade-table {
   margin-bottom: 8px;
 }
 
+@media (max-width: 1024px) {
+  /* Tablet: persempit kolom sticky supaya tabel tidak terlalu lebar */
+  .form-grid { grid-template-columns: 1fr 1fr; }
+  .grade-table th.no,
+  .grade-table td.no {
+    width: 40px; min-width: 40px; max-width: 40px;
+  }
+  .grade-table th.nama,
+  .grade-table td.nama {
+    width: 170px; min-width: 170px; max-width: 170px;
+    left: 40px; /* HARUS sama dengan width NO di atas */
+    font-size: 12px;
+  }
+  /* Saat sedikit kolom TP terpilih di tablet, tetap beri ruang lega */
+  .grade-table.cols-few th.tp-col,
+  .grade-table.cols-few td.tp-col {
+    width: 90px; min-width: 90px; max-width: 90px;
+  }
+  .grade-table.cols-some th.tp-col,
+  .grade-table.cols-some td.tp-col {
+    width: 70px; min-width: 70px; max-width: 70px;
+  }
+}
+
 @media (max-width: 640px) {
   .form-grid { grid-template-columns: 1fr; }
   .toolbar { flex-direction: column; align-items: stretch; }
   .toolbar > * { width: 100%; }
   .login-card { padding: 28px 22px; }
+
+  /* HP: kolom sticky sangat sempit supaya prioritas ke kolom input */
+  .grade-table { font-size: 11px; }
+  .grade-table th, .grade-table td { padding: 3px 2px; }
+
+  .grade-table th.no,
+  .grade-table td.no {
+    width: 32px; min-width: 32px; max-width: 32px;
+    font-size: 11px;
+  }
+  .grade-table th.nama,
+  .grade-table td.nama {
+    width: 110px; min-width: 110px; max-width: 110px;
+    left: 32px; /* HARUS sama dengan width NO di tablet/HP */
+    font-size: 11px;
+  }
+  /* Kolom TP di HP: lebarkan supaya input 0-100 muat & tidak ter-clip */
+  .grade-table th.tp-col,
+  .grade-table td.tp-col {
+    width: 70px; min-width: 70px; max-width: 70px;
+  }
+  .grade-table.cols-few th.tp-col,
+  .grade-table.cols-few td.tp-col {
+    width: 90px; min-width: 90px; max-width: 90px;
+  }
+  .grade-table.cols-some th.tp-col,
+  .grade-table.cols-some td.tp-col {
+    width: 75px; min-width: 75px; max-width: 75px;
+  }
+  .grade-table.cols-many th.tp-col,
+  .grade-table.cols-many td.tp-col {
+    width: 55px; min-width: 55px; max-width: 55px;
+  }
+  /* Header NA/Rapor/Rank lebih ringkas */
+  .grade-table th.na-col, .grade-table td.na-col { width: 48px; min-width: 48px; max-width: 48px; }
+  .grade-table th.rapor-col, .grade-table td.rapor-col { width: 64px; min-width: 64px; max-width: 64px; font-size: 12px; }
+  .grade-table th.rank-col, .grade-table td.rank-col { width: 44px; min-width: 44px; max-width: 44px; }
+  .grade-table th.comp-col, .grade-table td.comp-col { width: 56px; min-width: 56px; max-width: 56px; }
+  .grade-table th.lm-col, .grade-table td.lm-col { width: 50px; min-width: 50px; max-width: 50px; }
+
+  .grade-table input.cell-input {
+    font-size: 13px;
+    padding: 6px 2px;
+    min-width: 36px;
+  }
+  .grade-table.cols-few input.cell-input { font-size: 15px; padding: 7px 3px; }
+  .grade-table.cols-some input.cell-input { font-size: 13px; padding: 5px 2px; }
+
+  /* Header aplikasi & user di HP - tumpuk vertikal */
+  .app-header { flex-direction: column; align-items: flex-start; }
+  .app-title h1 { font-size: 20px; }
+
+  /* Footer tetap di bawah tetapi tidak numpuk modals */
+  .app-footer { font-size: 11px; padding: 7px 14px; }
 }
 </style>
 </head>
@@ -1182,7 +1294,7 @@ function fmt(v, decimals = 0) {
 
     <div class="spacer"></div>
 
-    <button class="btn ghost small" onclick="window.print()">🖨️ Cetak / PDF</button>
+    <button class="btn ghost small" onclick="printMode()">🖨️ Cetak / PDF</button>
     <button class="btn small" onclick="showKelasInfoModal()">⚙️ Info Kelas</button>
   </div>
 
@@ -1199,6 +1311,10 @@ function fmt(v, decimals = 0) {
   </div>
 
   <!-- TABEL -->
+  <div id="emptyBanner" class="empty-cols-banner">
+    <strong>⚠ Tidak ada kolom yang dipilih.</strong> Klik tombol <em>"☷ Pilih Kolom"</em> di toolbar lalu centang TP/STS/SAS yang ingin diisi nilainya. Hanya kolom yang dipilih yang akan tampil.
+  </div>
+
   <div class="table-wrap">
     <!-- Print-only header -->
     <div class="print-header">
@@ -1658,95 +1774,149 @@ function renderTable() {
   const mode = document.getElementById('modeSelect').value;
   const siswa = kelasData.siswa || [];
 
-  // HEAD
+  // === Tentukan kolom TP mana yang harus tampil ===
+  // - Mode 'full'  => SEMUA 20 TP tampil
+  // - Mode 'input' => HANYA TP yang dipilih (selectedCols) yang tampil
+  //                    TP lain SAMA SEKALI tidak dirender (display:none tidak cukup,
+  //                    kita hilangkan dari DOM supaya colspan tabel otomatis benar
+  //                    dan kolom terlihat lebih lega / lebar).
+  const visibleTPs = []; // urut LM1..LM5 lalu TP1..TP4
+  if (mode === 'full') {
+    for (let lm = 1; lm <= 5; lm++) {
+      for (let tp = 1; tp <= 4; tp++) {
+        visibleTPs.push({ tp, lm, key: 'TP' + tp + '_LM' + lm });
+      }
+    }
+  } else {
+    for (let lm = 1; lm <= 5; lm++) {
+      for (let tp = 1; tp <= 4; tp++) {
+        const key = 'TP' + tp + '_LM' + lm;
+        if (selectedCols.has(key)) visibleTPs.push({ tp, lm, key });
+      }
+    }
+  }
+
+  // STS & SAS: di mode 'input' hanya tampil jika dipilih. Di mode 'full' selalu tampil.
+  const showSTS = (mode === 'full') || selectedCols.has('STS');
+  const showSAS = (mode === 'full') || selectedCols.has('SAS');
+
+  // Hitung jumlah TP per LM (untuk colspan di Row 2)
+  const tpCountPerLM = [0, 0, 0, 0, 0]; // index 0 = LM1, dst
+  visibleTPs.forEach(t => { tpCountPerLM[t.lm - 1]++; });
+
+  // === Beri kelas dinamis pada tabel supaya CSS bisa atur lebar TP otomatis ===
+  const tableEl = document.getElementById('gradeTable');
+  tableEl.classList.remove('cols-few', 'cols-some', 'cols-many');
+  if (visibleTPs.length === 0) {
+    // Tidak ada kolom TP - tetap pakai default (akan tampil kosong + banner)
+  } else if (visibleTPs.length <= 5) {
+    tableEl.classList.add('cols-few');
+  } else if (visibleTPs.length <= 12) {
+    tableEl.classList.add('cols-some');
+  } else {
+    tableEl.classList.add('cols-many');
+  }
+
+  // === Tampilkan / sembunyikan banner "tidak ada kolom dipilih" ===
+  const banner = document.getElementById('emptyBanner');
+  if (mode === 'input' && visibleTPs.length === 0 && !showSTS && !showSAS) {
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+
+  // === HEAD ===
   const head = document.getElementById('tableHead');
   let html = '';
   // Row 1: group headers
   html += '<tr class="group-row"><th class="no" rowspan="3">NO</th><th class="nama" rowspan="3">NAMA SISWA</th>';
-  // Formatif (C-V: 5 LM)
-  html += '<th colspan="20" class="lm-header">FORMATIF (5 Lingkup Materi × 4 TP)</th>';
+  if (visibleTPs.length > 0) {
+    const tpLabel = mode === 'full'
+      ? 'FORMATIF (5 Lingkup Materi &times; 4 TP)'
+      : 'FORMATIF (' + visibleTPs.length + ' TP terpilih)';
+    html += '<th colspan="' + visibleTPs.length + '" class="lm-header">' + tpLabel + '</th>';
+  }
   html += '<th colspan="5" class="lm-header">SUMATIF LINGKUP MATERI</th>';
   html += '<th rowspan="3" class="result-header comp-col">30% LM TOTAL</th>';
-  html += '<th rowspan="3" class="sts-header comp-col">STS</th>';
+  if (showSTS) {
+    html += '<th rowspan="3" class="sts-header comp-col">STS</th>';
+  }
   html += '<th rowspan="3" class="sts-header comp-col">30% STS</th>';
-  html += '<th rowspan="3" class="sts-header comp-col">SAS</th>';
+  if (showSAS) {
+    html += '<th rowspan="3" class="sts-header comp-col">SAS</th>';
+  }
   html += '<th rowspan="3" class="sts-header comp-col">40% SAS</th>';
   html += '<th rowspan="3" class="result-header na-col">NA</th>';
   html += '<th rowspan="3" class="result-header rapor-col">NILAI RAPOR</th>';
   html += '<th rowspan="3" class="result-header rank-col">RANK</th>';
   html += '</tr>';
 
-  // Row 2: LM names (TP4×5 = 20 cols + LM 5 cols)
+  // Row 2: LM names - colspan menyesuaikan jumlah TP terlihat per LM
   html += '<tr>';
   for (let lm = 1; lm <= 5; lm++) {
-    html += `<th colspan="4" class="lm-header">Lingkup Materi ${lm}</th>`;
+    const count = tpCountPerLM[lm - 1];
+    if (count > 0) {
+      html += '<th colspan="' + count + '" class="lm-header">Lingkup Materi ' + lm + '</th>';
+    }
   }
   for (let lm = 1; lm <= 5; lm++) {
-    html += `<th class="lm-header lm-col">LM${lm}</th>`;
+    html += '<th class="lm-header lm-col">LM' + lm + '</th>';
   }
   html += '</tr>';
 
-  // Row 3: TP names (20 cols) + LM (5 cols, already added in row 2 via rowspan, but here just empty cells)
-  // Actually we added LM in row 2, so row 3 only needs the 20 TP cols
+  // Row 3: TP names - hanya yang visible
   html += '<tr>';
   for (let lm = 1; lm <= 5; lm++) {
-    for (let tp = 1; tp <= 4; tp++) {
-      html += `<th class="tp-col">TP${tp}</th>`;
-    }
+    // urutkan visibleTPs untuk LM ini sesuai TP ascending
+    const tpsForLM = visibleTPs.filter(t => t.lm === lm).sort((a, b) => a.tp - b.tp);
+    tpsForLM.forEach(t => {
+      html += '<th class="tp-col">TP' + t.tp + '</th>';
+    });
   }
   html += '</tr>';
 
   head.innerHTML = html;
 
-  // BODY
+  // === BODY ===
   const body = document.getElementById('tableBody');
   body.innerHTML = siswa.map((s, i) => {
     let row = '<tr>';
-    row += `<td class="no">${s.no || (i+1)}</td>`;
-    row += `<td class="nama" title="${escapeHtml(s.nama)}">${escapeHtml(s.nama)}</td>`;
+    row += '<td class="no">' + (s.no || (i + 1)) + '</td>';
+    row += '<td class="nama" title="' + escapeHtml(s.nama) + '">' + escapeHtml(s.nama) + '</td>';
 
-    // TP cells (C-V) - 20 cols
-    for (let lm = 0; lm < 5; lm++) {
-      for (let tp = 0; tp < 4; tp++) {
-        const colKey = 'TP' + (tp+1) + '_LM' + (lm+1);
-        const val = s.tp[lm][tp];
-        const isInputCol = mode === 'full' || selectedCols.has(colKey);
-        if (isInputCol) {
-          row += `<td class="tp-col"><input type="number" min="0" max="100" class="cell-input" data-row="${s.row}" data-col="${colKey}" value="${val}" onfocus="this.select()" onchange="onCellEdit(this)"></td>`;
-        } else {
-          row += `<td class="computed lm tp-col">${fmt(val)}</td>`;
-        }
-      }
-    }
+    // TP cells - hanya yang visible, SEMUA sebagai input (tidak ada read-only lagi)
+    visibleTPs.forEach(t => {
+      const val = s.tp[t.lm - 1][t.tp - 1];
+      row += '<td class="tp-col"><input type="number" min="0" max="100" class="cell-input" data-row="' + s.row + '" data-col="' + t.key + '" value="' + val + '" onfocus="this.select()" onchange="onCellEdit(this)"></td>';
+    });
 
-    // LM1-LM5 (W-AA) - 5 cols
+    // LM1-LM5 (W-AA) - 5 cols (selalu tampil, computed)
     for (let lm = 0; lm < 5; lm++) {
-      row += `<td class="computed lm lm-col">${fmt(s.lm[lm], 1)}</td>`;
+      row += '<td class="computed lm lm-col">' + fmt(s.lm[lm], 1) + '</td>';
     }
     // 30% LM Total
-    row += `<td class="computed comp-col">${fmt(s.lmTotal)}</td>`;
-    // STS (input if selected, else read-only)
-    if (mode === 'full' || selectedCols.has('STS')) {
-      row += `<td class="comp-col"><input type="number" min="0" max="100" class="cell-input" data-row="${s.row}" data-col="STS" value="${s.sts}" onfocus="this.select()" onchange="onCellEdit(this)"></td>`;
-    } else {
-      row += `<td class="computed sts comp-col">${fmt(s.sts)}</td>`;
+    row += '<td class="computed comp-col">' + fmt(s.lmTotal) + '</td>';
+
+    // STS (input jika visible, jika tidak - JANGAN dirender sama sekali)
+    if (showSTS) {
+      row += '<td class="comp-col"><input type="number" min="0" max="100" class="cell-input" data-row="' + s.row + '" data-col="STS" value="' + s.sts + '" onfocus="this.select()" onchange="onCellEdit(this)"></td>';
     }
-    // 30% STS
-    row += `<td class="computed sts comp-col">${fmt(s.stsPct, 1)}</td>`;
-    // SAS (input if selected)
-    if (mode === 'full' || selectedCols.has('SAS')) {
-      row += `<td class="comp-col"><input type="number" min="0" max="100" class="cell-input" data-row="${s.row}" data-col="SAS" value="${s.sas}" onfocus="this.select()" onchange="onCellEdit(this)"></td>`;
-    } else {
-      row += `<td class="computed sts comp-col">${fmt(s.sas)}</td>`;
+    // 30% STS (selalu tampil - computed)
+    row += '<td class="computed sts comp-col">' + fmt(s.stsPct, 1) + '</td>';
+
+    // SAS (input jika visible, jika tidak - JANGAN dirender)
+    if (showSAS) {
+      row += '<td class="comp-col"><input type="number" min="0" max="100" class="cell-input" data-row="' + s.row + '" data-col="SAS" value="' + s.sas + '" onfocus="this.select()" onchange="onCellEdit(this)"></td>';
     }
-    // 40% SAS
-    row += `<td class="computed sts comp-col">${fmt(s.sasPct, 1)}</td>`;
+    // 40% SAS (selalu tampil - computed)
+    row += '<td class="computed sts comp-col">' + fmt(s.sasPct, 1) + '</td>';
+
     // NA
-    row += `<td class="computed na na-col">${fmt(s.na, 1)}</td>`;
+    row += '<td class="computed na na-col">' + fmt(s.na, 1) + '</td>';
     // Rapor
-    row += `<td class="computed rapor rapor-col">${fmt(s.rapor)}</td>`;
+    row += '<td class="computed rapor rapor-col">' + fmt(s.rapor) + '</td>';
     // Rank
-    row += `<td class="computed rank rank-col">${s.rank || ''}</td>`;
+    row += '<td class="computed rank rank-col">' + (s.rank || '') + '</td>';
 
     row += '</tr>';
     return row;
@@ -1808,17 +1978,19 @@ async function onCellEdit(input) {
 }
 
 function refreshComputedCells() {
-  // Update computed cells with new values without re-rendering inputs
+  // Update computed cells with new values without re-rendering inputs.
+  // CATATAN: setelah revisi renderTable(), di Mode Input:
+  //   - Kolom TP yang tidak dipilih TIDAK dirender (tidak ada di DOM)
+  //   - Kolom STS / SAS juga TIDAK dirender kalau tidak dipilih
+  //   - Sel terkomputasi yang selalu ada (urutan DOM): LM1, LM2, LM3, LM4, LM5,
+  //     LMtotal, 30% STS, 40% SAS, NA, Rapor, Rank = 11 sel td.computed
+  // Nilai STS/SAS sendiri (input) bukan td.computed - tidak perlu di-update di sini.
   if (!kelasData) return;
   const body = document.getElementById('tableBody');
   kelasData.siswa.forEach((s, i) => {
     const tr = body.rows[i];
     if (!tr) return;
-    // Computed cells: index 22 onwards (after no, nama, 20 TP)
-    // col 0=no, 1=nama, 2-21=TP, 22-26=LM, 27=LMtotal, 28=STS, 29=STS%, 30=SAS, 31=SAS%, 32=NA, 33=Rapor, 34=Rank
     const cells = tr.querySelectorAll('td.computed');
-    // Order in DOM: lm1-5, lmTotal, sts%, sas%, na, rapor, rank (skipping STS/SAS yang berupa input)
-    let idx = 0;
     const values = [
       fmt(s.lm[0],1), fmt(s.lm[1],1), fmt(s.lm[2],1), fmt(s.lm[3],1), fmt(s.lm[4],1),
       fmt(s.lmTotal),
@@ -1828,8 +2000,8 @@ function refreshComputedCells() {
       fmt(s.rapor),
       s.rank || ''
     ];
-    cells.forEach(c => {
-      if (idx < values.length) c.textContent = values[idx++];
+    cells.forEach((c, idx) => {
+      if (idx < values.length) c.textContent = values[idx];
     });
   });
 }
@@ -2040,6 +2212,22 @@ function showConfirm(title, msg, onYes) {
   // Replace onclick to avoid stacking
   btn.onclick = () => { hideModal('confirmModal'); onYes(); };
   showModal('confirmModal');
+}
+
+// === PRINT MODE: cetak / PDF selalu tampilkan SEMUA kolom (abaikan pilihan kolom) ===
+function printMode() {
+  if (!kelasData) { toast('Pilih kelas dulu', 'info'); return; }
+  const modeSel = document.getElementById('modeSelect');
+  const prevMode = modeSel.value;
+  modeSel.value = 'full';
+  renderTable();
+  // Beri sedikit delay supaya render selesai sebelum dialog cetak muncul
+  setTimeout(() => {
+    window.print();
+    // Setelah dialog cetak ditutup, kembalikan ke mode semula
+    modeSel.value = prevMode;
+    renderTable();
+  }, 250);
 }
 
 // === PRINT FOOTER ===
