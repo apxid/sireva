@@ -120,14 +120,15 @@ body::before {
 .login-logo {
   width: 78px; height: 78px;
   margin: 0 auto 14px;
-  background: linear-gradient(135deg, var(--blue), var(--blue-light));
+  background: #fff;
   border-radius: 20px;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Times New Roman', serif;
-  font-size: 36px; font-weight: bold; color: var(--osis);
+  overflow: hidden;
   box-shadow: 0 8px 20px rgba(29,78,216,.3);
   position: relative;
   animation: logoBounce 2.5s ease-in-out infinite;
+  object-fit: contain;
+  padding: 8px;
 }
 @keyframes logoBounce {
   0%, 100% { transform: translateY(0); }
@@ -528,9 +529,15 @@ table.grade-table {
   font-weight: 600;
   box-shadow: 1px 0 0 #cbd5e1;
 }
+/* Header NO pakai gradient biru SAMA PERSIS dengan header NAMA supaya konsisten.
+   Override background default #f1f5f9 (yang hanya untuk td.no). */
 .grade-table th.no {
   z-index: 4;
   top: 0;
+  background: linear-gradient(135deg, var(--blue), var(--blue-light));
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 1px 0 0 rgba(255,255,255,.3);
 }
 
 /* === Kolom NAMA: fixed 230px, sticky di left:48px (= NO width) === */
@@ -1049,6 +1056,31 @@ table.grade-table {
   overflow: hidden;
   max-width: 480px;
   box-shadow: 0 24px 60px rgba(15,23,42,.18), 0 0 0 1px rgba(15,23,42,.04);
+  position: relative;
+}
+/* Override modal-close supaya TAMPIL JELAS di atas hero gradient.
+   Tombol ini HARUS terlihat - beri background putih solid + z-index tinggi. */
+#aboutModal .modal-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,.96);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 22px;
+  color: #1e3a8a;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.05);
+  font-weight: 700;
+  line-height: 1;
+}
+#aboutModal .modal-close:hover {
+  background: #dc2626;
+  color: #fff;
+  transform: rotate(90deg);
 }
 .about-content { text-align: center; padding: 0; }
 
@@ -1076,17 +1108,27 @@ table.grade-table {
   background: radial-gradient(circle, rgba(201,240,58,.25), transparent 70%);
   border-radius: 50%;
 }
+/* Logo: gunakan gambar dari URL eksternal */
 .about-logo {
-  width: 78px; height: 78px;
+  width: 86px; height: 86px;
   margin: 0 auto 14px;
   background: rgba(255,255,255,.96);
   border-radius: 20px;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Times New Roman', serif;
-  font-size: 36px; font-weight: 700; color: #1d4ed8;
+  overflow: hidden;
   box-shadow: 0 8px 22px rgba(0,0,0,.18);
   position: relative;
   z-index: 1;
+  /* Jika elemen adalah <img>, override layout dasarnya */
+  object-fit: contain;
+  padding: 8px;
+}
+.about-logo.img-mode {
+  /* Untuk <img> - reset properti text */
+  font-family: inherit;
+  font-size: 0;
+  font-weight: 400;
+  color: initial;
 }
 .about-title {
   font-family: 'Times New Roman', serif;
@@ -1459,7 +1501,7 @@ function fmt(v, decimals = 0) {
      ========================= -->
 <div id="loginLayer">
   <div class="login-card">
-    <div class="login-logo">RN</div>
+    <img src="https://apxid.github.io/sireva/assets/rn.png" alt="Rekap Nilai Informatika" class="login-logo" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><rect width=%22120%22 height=%22120%22 fill=%22%231d4ed8%22 rx=%2218%22/><text x=%2260%22 y=%2275%22 text-anchor=%22middle%22 font-family=%22Times New Roman%22 font-size=%2252%22 font-weight=%22bold%22 fill=%22%23FFD60A%22>RN</text></svg>'">
     <div class="login-title">REKAP NILAI INFORMATIKA</div>
 
 
@@ -1580,7 +1622,7 @@ function fmt(v, decimals = 0) {
 
       <!-- HERO: gradient biru + logo -->
       <div class="about-hero">
-        <div class="about-logo">RN</div>
+        <img src="https://apxid.github.io/sireva/assets/rn.png" alt="Rekap Nilai Informatika" class="about-logo img-mode" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><rect width=%22120%22 height=%22120%22 fill=%22%23fff%22 rx=%2218%22/><text x=%2260%22 y=%2275%22 text-anchor=%22middle%22 font-family=%22Times New Roman%22 font-size=%2252%22 font-weight=%22bold%22 fill=%22%231d4ed8%22>RN</text></svg>'">
         <div class="about-title">Rekap Nilai Informatika</div>
         <div class="about-subtitle">Sistem Penilaian Siswa SMP Berbasis Google Apps Script</div>
       </div>
@@ -1637,6 +1679,11 @@ function fmt(v, decimals = 0) {
           Dev by <span class="heart">♥</span> <strong>mb</strong>
           <div class="about-version">© 2026 Rekap Nilai Informatika · All Rights Reserved</div>
         </div>
+
+        <!-- TOMBOL TUTUP EKSPLISIT - besar, jelas, gampang diklik -->
+        <button class="btn ghost" onclick="hideModal('aboutModal')" style="width: 100%; margin-top: 14px; padding: 11px; font-size: 13px; justify-content: center;">
+          ✕ Tutup
+        </button>
 
       </div>
     </div>
@@ -2659,20 +2706,50 @@ function showConfirm(title, msg, onYes) {
   showModal('confirmModal');
 }
 
-// === PRINT MODE: cetak / PDF selalu tampilkan SEMUA kolom (abaikan pilihan kolom) ===
+// === PRINT MODE: cetak / PDF SESUAI KOLOM YANG DIPILIH / CEKLIST ===
+// Tidak paksa mode 'full' lagi - cetak sesuai kondisi view saat ini.
+//   - Mode Input + pilih TP1 saja -> PDF hanya berisi TP1 + NA + Rapor + Rank
+//   - Mode Input + pilih TP1 + STS -> PDF berisi TP1 + STS + 30% STS + NA + Rapor + Rank
+//   - Mode Full -> PDF berisi SEMUA kolom
+// Print-header (judul + kelas) & print-footer (tanda tangan) tetap muncul otomatis.
 function printMode() {
   if (!kelasData) { toast('Pilih kelas dulu', 'info'); return; }
   const modeSel = document.getElementById('modeSelect');
-  const prevMode = modeSel.value;
-  modeSel.value = 'full';
-  renderTable();
-  // Beri sedikit delay supaya render selesai sebelum dialog cetak muncul
+  const mode = modeSel.value;
+  // Hitung jumlah kolom yang akan tercetak untuk konfirmasi user
+  let colCount = 0;
+  let colDesc = '';
+  if (mode === 'full') {
+    colCount = 20; // 5 LM x 4 TP
+    colDesc = 'SEMUA kolom (Mode Lengkap)';
+  } else {
+    // Hitung dari selectedCols
+    let tpCount = 0;
+    for (let lm = 1; lm <= 5; lm++) {
+      for (let tp = 1; tp <= 4; tp++) {
+        if (selectedCols.has('TP' + tp + '_LM' + lm)) tpCount++;
+      }
+    }
+    colCount = tpCount + (selectedCols.has('STS') ? 1 : 0) + (selectedCols.has('SAS') ? 1 : 0);
+    if (colCount === 0) {
+      toast('Tidak ada kolom yang dipilih. Centang TP/STS/SAS dulu.', 'err', 3500);
+      // Buka col-selector otomatis supaya user gampang pilih
+      document.getElementById('colSelector').classList.add('show');
+      return;
+    }
+    const parts = [];
+    if (tpCount > 0) parts.push(tpCount + ' TP');
+    if (selectedCols.has('STS')) parts.push('STS');
+    if (selectedCols.has('SAS')) parts.push('SAS');
+    colDesc = parts.join(' + ') + ' (sesuai pilihan)';
+  }
+  // Konfirmasi singkat (bukan blocking) - tampilkan toast info
+  toast('Mencetak: ' + colDesc + ' ...', 'info', 1800);
+  // Beri sedikit delay supaya toast muncul dulu sebelum dialog print browser
   setTimeout(() => {
     window.print();
-    // Setelah dialog cetak ditutup, kembalikan ke mode semula
-    modeSel.value = prevMode;
-    renderTable();
-  }, 250);
+  }, 350);
+  // Tidak perlu renderTable() ulang - kondisi sudah sesuai
 }
 
 // === PRINT FOOTER ===
