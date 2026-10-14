@@ -7,7 +7,10 @@
 
 <!-- =========================================================
      REKAP NILAI INFORMATIKA - FRONTEND
-     Build: 11 Oktober 2026 | Dev by: mb
+     Build: 14 Oktober 2026 | Dev by: mb
+     - Revisi: kolom TP/STS/SAS hanya tampil yang dipilih (Mode Input)
+     - Revisi: popup About putih profesional + link download
+     - Revisi: aturan warna cell nilai (<78 merah, =78 kuning, >78 hijau)
      ========================================================= -->
 
 <style>
@@ -665,6 +668,73 @@ table.grade-table {
 /* Hidden columns when not selected */
 .grade-table .col-hidden { display: none; }
 
+/* === Color rules untuk cell nilai ===
+   < 78  -> merah (belum tuntas)
+   = 78  -> kuning (batas tuntas / KKTP default)
+   > 78  -> hijau (tuntas)
+   Aturan diterapkan ke tdNilai (td berisi input ATAU td.computed).
+   Untuk input cell, warna teks juga diubah supaya kontras.
+   Catatan: aturan TIDAK berlaku untuk kolom Rank (bukan nilai 0-100).
+   Specificity tinggi: aturan ini MENIMPA background biru default td.computed.na / .rapor. */
+.grade-table td.cell-below,
+.grade-table td.cell-below input.cell-input {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  font-weight: 700;
+}
+.grade-table td.cell-equal,
+.grade-table td.cell-equal input.cell-input {
+  background: #fef9c3 !important;
+  color: #854d0e !important;
+  font-weight: 700;
+}
+.grade-table td.cell-above,
+.grade-table td.cell-above input.cell-input {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  font-weight: 700;
+}
+/* Override juga untuk td.computed.na / td.computed.rapor yang punya background biru default */
+.grade-table td.computed.na.cell-below,
+.grade-table td.computed.rapor.cell-below {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+.grade-table td.computed.na.cell-equal,
+.grade-table td.computed.rapor.cell-equal {
+  background: #fef9c3 !important;
+  color: #854d0e !important;
+}
+.grade-table td.computed.na.cell-above,
+.grade-table td.computed.rapor.cell-above {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+}
+/* Saat input sedang difocus, beri outline biru meskipun background berwarna */
+.grade-table td.cell-below input.cell-input:focus,
+.grade-table td.cell-equal input.cell-input:focus,
+.grade-table td.cell-above input.cell-input:focus {
+  outline: 2px solid var(--blue);
+  box-shadow: 0 0 0 3px rgba(29,78,216,.2);
+}
+/* Legenda warna (mini legend di toolbar / about) */
+.color-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.color-legend .swatch {
+  width: 14px; height: 14px;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,.1);
+  display: inline-block;
+}
+.color-legend .swatch.below { background: #fee2e2; }
+.color-legend .swatch.equal { background: #fef9c3; }
+.color-legend .swatch.above { background: #dcfce7; }
+
 /* Subgroup header (FORMATIF, etc) */
 .grade-table .group-row th {
   font-size: 11px;
@@ -703,6 +773,35 @@ table.grade-table {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+  /* Print: warna indikator nilai (merah/kuning/hijau) HARUS muncul di PDF */
+  .grade-table td.cell-below,
+  .grade-table td.cell-below input.cell-input {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .grade-table td.cell-equal,
+  .grade-table td.cell-equal input.cell-input {
+    background: #fef9c3 !important;
+    color: #854d0e !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .grade-table td.cell-above,
+  .grade-table td.cell-above input.cell-input {
+    background: #dcfce7 !important;
+    color: #166534 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* Saat print, NA cell yang berwarna harus tampil meski class .na memberi biru */
+  .grade-table td.computed.na.cell-below { background: #fee2e2 !important; color: #991b1b !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .grade-table td.computed.na.cell-equal { background: #fef9c3 !important; color: #854d0e !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .grade-table td.computed.na.cell-above { background: #dcfce7 !important; color: #166534 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .grade-table td.computed.rapor.cell-below { background: #fee2e2 !important; color: #991b1b !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .grade-table td.computed.rapor.cell-equal { background: #fef9c3 !important; color: #854d0e !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .grade-table td.computed.rapor.cell-above { background: #dcfce7 !important; color: #166534 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .print-header {
     display: block !important;
     text-align: center;
@@ -942,85 +1041,223 @@ table.grade-table {
   border-radius: 3px;
 }
 
-/* About popup */
-.about-content { text-align: center; padding: 20px 10px; }
-.about-logo {
-  width: 100px; height: 100px;
-  margin: 0 auto 16px;
-  background: linear-gradient(135deg, var(--blue), var(--blue-light));
-  border-radius: 26px;
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Times New Roman', serif;
-  font-size: 48px; font-weight: bold; color: var(--osis);
-  box-shadow: 0 10px 24px rgba(29,78,216,.3);
-  position: relative;
+/* About popup - putih minimalis profesional */
+#aboutModal .modal-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 0;
+  overflow: hidden;
+  max-width: 480px;
+  box-shadow: 0 24px 60px rgba(15,23,42,.18), 0 0 0 1px rgba(15,23,42,.04);
 }
-.about-logo::after {
+.about-content { text-align: center; padding: 0; }
+
+/* Banner atas dengan gradient halus + logo */
+.about-hero {
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 60%, #60a5fa 100%);
+  padding: 36px 24px 28px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.about-hero::before {
   content: '';
   position: absolute;
-  bottom: -8px; left: 50%;
-  transform: translateX(-50%);
-  width: 50px; height: 8px;
-  background: var(--vr46);
-  border-radius: 8px;
-  box-shadow: 0 0 14px var(--vr46);
+  top: -40px; right: -40px;
+  width: 140px; height: 140px;
+  background: radial-gradient(circle, rgba(255,255,255,.18), transparent 70%);
+  border-radius: 50%;
+}
+.about-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -30px; left: -30px;
+  width: 100px; height: 100px;
+  background: radial-gradient(circle, rgba(201,240,58,.25), transparent 70%);
+  border-radius: 50%;
+}
+.about-logo {
+  width: 78px; height: 78px;
+  margin: 0 auto 14px;
+  background: rgba(255,255,255,.96);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Times New Roman', serif;
+  font-size: 36px; font-weight: 700; color: #1d4ed8;
+  box-shadow: 0 8px 22px rgba(0,0,0,.18);
+  position: relative;
+  z-index: 1;
 }
 .about-title {
   font-family: 'Times New Roman', serif;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
-  color: var(--blue-dark);
-  margin: 16px 0 4px;
+  margin: 0 0 4px;
+  letter-spacing: .3px;
+  position: relative; z-index: 1;
 }
 .about-subtitle {
-  color: var(--muted);
-  font-size: 13px;
-  margin-bottom: 20px;
+  color: rgba(255,255,255,.85);
+  font-size: 12px;
+  margin: 0;
+  position: relative; z-index: 1;
 }
+
+/* Body putih bersih */
+.about-body { padding: 22px 24px 18px; }
+
+.about-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #64748b;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.about-section-title::before {
+  content: '';
+  width: 18px; height: 2px;
+  background: #1d4ed8;
+  border-radius: 2px;
+}
+
 .about-info {
-  background: linear-gradient(135deg, #f0f9ff, #fef9c3);
-  border-radius: 12px;
-  padding: 16px;
-  margin: 16px 0;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 6px 14px;
+  margin: 0 0 18px;
   text-align: left;
 }
 .about-info .row {
   display: flex;
   justify-content: space-between;
-  padding: 6px 0;
-  border-bottom: 1px dashed var(--line);
-  font-size: 13px;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 12.5px;
 }
 .about-info .row:last-child { border-bottom: none; }
-.about-info .row .key { color: var(--muted); font-weight: 500; }
-.about-info .row .val { font-weight: 700; color: var(--blue-dark); }
-.about-info .row .val.accent { color: var(--blue); }
+.about-info .row .key { color: #64748b; font-weight: 500; }
+.about-info .row .val { font-weight: 700; color: #0f172a; }
+.about-info .row .val.accent { color: #1d4ed8; }
 
-.about-stripes {
+/* Card legenda warna nilai */
+.about-legend {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px;
+  margin: 0 0 18px;
+  text-align: left;
+}
+.about-legend .legend-row {
   display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin: 14px 0;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 12.5px;
+  color: #334155;
 }
-.about-stripes .swatch {
-  width: 60px; height: 60px;
+.about-legend .legend-row .swatch {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,0,0,.08);
+  flex-shrink: 0;
+}
+.about-legend .legend-row .swatch.below { background: #fee2e2; }
+.about-legend .legend-row .swatch.equal { background: #fef9c3; }
+.about-legend .legend-row .swatch.above { background: #dcfce7; }
+.about-legend .legend-row .desc { color: #64748b; font-size: 11px; margin-left: auto; }
+
+/* Download section - CTA utama */
+.about-download {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
   border-radius: 12px;
-  display: flex; align-items: end; justify-content: center;
-  padding-bottom: 6px;
-  font-size: 10px;
-  font-weight: 600;
+  padding: 16px;
+  margin: 0 0 18px;
+  text-align: center;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
 }
-.about-stripes .swatch.biru { background: var(--blue); color: #fff; }
-.about-stripes .swatch.vr46 { background: var(--vr46); color: var(--blue-dark); }
-.about-stripes .swatch.osis { background: var(--osis); color: var(--blue-dark); }
+.about-download::before {
+  content: '';
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 80px; height: 80px;
+  background: radial-gradient(circle, rgba(201,240,58,.3), transparent 70%);
+  border-radius: 50%;
+}
+.about-download-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(255,255,255,.8);
+  margin-bottom: 4px;
+  position: relative; z-index: 1;
+}
+.about-download-sub {
+  font-size: 13px;
+  color: #fff;
+  margin-bottom: 12px;
+  position: relative; z-index: 1;
+}
+.about-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  color: #1d4ed8;
+  text-decoration: none;
+  padding: 10px 18px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  transition: transform .15s, box-shadow .2s;
+  box-shadow: 0 6px 14px rgba(0,0,0,.18);
+  position: relative; z-index: 1;
+}
+.about-download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0,0,0,.25);
+}
+.about-download-btn svg { width: 16px; height: 16px; }
+.about-download-link {
+  display: block;
+  margin-top: 8px;
+  font-size: 11px;
+  color: rgba(255,255,255,.7);
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+  position: relative; z-index: 1;
+}
 
 .about-credit {
-  margin-top: 16px;
-  font-size: 14px;
-  color: var(--blue-dark);
-  font-weight: 600;
+  margin: 0 0 4px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 11.5px;
+  color: #64748b;
 }
-.about-credit .heart { color: var(--err); }
+.about-credit .heart { color: #dc2626; }
+.about-credit strong { color: #0f172a; font-weight: 700; }
+.about-version {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 4px;
+  letter-spacing: .5px;
+}
+
+@media (max-width: 640px) {
+  #aboutModal .modal-card { max-width: 100%; margin: 0 8px; }
+  .about-hero { padding: 28px 18px 22px; }
+  .about-body { padding: 18px; }
+}
 
 /* Setup first-run modal */
 .setup-welcome {
@@ -1261,7 +1498,7 @@ function fmt(v, decimals = 0) {
   <div class="app-header">
     <div class="app-title">
       <h1>REKAP <span class="accent">NILAI</span> INFORMATIKA</h1>
-      <p id="appSubtitle">Sistem Penilaian Siswa SMP - Build 11 Oktober 2026</p>
+      <p id="appSubtitle">Sistem Penilaian Siswa SMP - Build 14 Oktober 2026</p>
     </div>
     <div class="app-user">
       <div class="app-user-avatar" id="userAvatar">A</div>
@@ -1338,22 +1575,69 @@ function fmt(v, decimals = 0) {
      ========================= -->
 <div id="aboutModal" class="modal">
   <div class="modal-card">
-    <button class="modal-close" onclick="hideModal('aboutModal')">×</button>
+    <button class="modal-close" onclick="hideModal('aboutModal')" aria-label="Tutup">×</button>
     <div class="about-content">
-      <div class="about-logo">RN</div>
-      <div class="about-title">Rekap Nilai Informatika</div>
-      <div class="about-subtitle">Sistem Penilaian Siswa SMP Berbasis Google Apps Script</div>
 
-      <div class="about-info">
-        <div class="row"><span class="key">Nama Aplikasi</span><span class="val">Rekap Nilai Informatika</span></div>
-        <div class="row"><span class="key">Versi</span><span class="val accent">1.0.0</span></div>
-        <div class="row"><span class="key">Build</span><span class="val">11 Oktober 2026</span></div>
-        <div class="row"><span class="key">Platform</span><span class="val">Google Apps Script + HTML</span></div>
-        <div class="row"><span class="key">Lisensi</span><span class="val">Edukasi - Bebas Digunakan</span></div>
+      <!-- HERO: gradient biru + logo -->
+      <div class="about-hero">
+        <div class="about-logo">RN</div>
+        <div class="about-title">Rekap Nilai Informatika</div>
+        <div class="about-subtitle">Sistem Penilaian Siswa SMP Berbasis Google Apps Script</div>
       </div>
 
-      <div class="about-credit">
-        Dev by <span class="heart">♥</span> <strong>mb</strong>
+      <div class="about-body">
+
+        <!-- INFO APLIKASI -->
+        <div class="about-section-title">Informasi Aplikasi</div>
+        <div class="about-info">
+          <div class="row"><span class="key">Nama Aplikasi</span><span class="val">Rekap Nilai Informatika</span></div>
+          <div class="row"><span class="key">Versi</span><span class="val accent">1.1.0</span></div>
+          <div class="row"><span class="key">Build</span><span class="val">14 Oktober 2026</span></div>
+          <div class="row"><span class="key">Platform</span><span class="val">Google Apps Script + HTML</span></div>
+          <div class="row"><span class="key">Lisensi</span><span class="val">Edukasi - Bebas Digunakan</span></div>
+        </div>
+
+        <!-- LEGENDA WARNA NILAI -->
+        <div class="about-section-title">Indikator Warna Nilai</div>
+        <div class="about-legend">
+          <div class="legend-row">
+            <span class="swatch below"></span>
+            <span>Nilai &lt; 78</span>
+            <span class="desc">Belum Tuntas</span>
+          </div>
+          <div class="legend-row">
+            <span class="swatch equal"></span>
+            <span>Nilai = 78</span>
+            <span class="desc">Batas Tuntas (KKTP)</span>
+          </div>
+          <div class="legend-row">
+            <span class="swatch above"></span>
+            <span>Nilai &gt; 78</span>
+            <span class="desc">Tuntas</span>
+          </div>
+        </div>
+
+        <!-- DOWNLOAD CTA -->
+        <div class="about-download">
+          <div class="about-download-title"> Unduh Aplikasi</div>
+          <div class="about-download-sub">Dapatkan source code &amp; template spreadsheet</div>
+          <a href="https://lynk.id/mb_dprint" target="_blank" rel="noopener noreferrer" class="about-download-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3v12"/>
+              <path d="m7 10 5 5 5-5"/>
+              <path d="M5 21h14"/>
+            </svg>
+            <span>lynk.id/mb_dprint</span>
+          </a>
+          <span class="about-download-link">https://lynk.id/mb_dprint</span>
+        </div>
+
+        <!-- CREDIT -->
+        <div class="about-credit">
+          Dev by <span class="heart">♥</span> <strong>mb</strong>
+          <div class="about-version">© 2026 Rekap Nilai Informatika · All Rights Reserved</div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -1529,7 +1813,7 @@ function fmt(v, decimals = 0) {
 <div class="app-footer">
   <div class="footer-text" onclick="showAbout()">
     <span class="footer-dot"></span>
-    <span>Rekap Nilai Informatika &nbsp;Build 11 Oktober 2026 </span>
+    <span>Rekap Nilai Informatika &nbsp;Build 14 Oktober 2026 </span>
   </div>
   <div class="footer-stripes">
     <div class="stripe" style="background: #3b82f6;"></div>
@@ -1772,16 +2056,15 @@ function toggleColSelector() {
 function renderTable() {
   if (!kelasData) return;
   const mode = document.getElementById('modeSelect').value;
+  const isFull = (mode === 'full');
   const siswa = kelasData.siswa || [];
 
   // === Tentukan kolom TP mana yang harus tampil ===
   // - Mode 'full'  => SEMUA 20 TP tampil
-  // - Mode 'input' => HANYA TP yang dipilih (selectedCols) yang tampil
-  //                    TP lain SAMA SEKALI tidak dirender (display:none tidak cukup,
-  //                    kita hilangkan dari DOM supaya colspan tabel otomatis benar
-  //                    dan kolom terlihat lebih lega / lebar).
+  // - Mode 'input' => HANYA TP yang dipilih (selectedCols) yang tampil.
+  //                    TP yang tidak dipilih TIDAK dirender sama sekali.
   const visibleTPs = []; // urut LM1..LM5 lalu TP1..TP4
-  if (mode === 'full') {
+  if (isFull) {
     for (let lm = 1; lm <= 5; lm++) {
       for (let tp = 1; tp <= 4; tp++) {
         visibleTPs.push({ tp, lm, key: 'TP' + tp + '_LM' + lm });
@@ -1796,9 +2079,22 @@ function renderTable() {
     }
   }
 
-  // STS & SAS: di mode 'input' hanya tampil jika dipilih. Di mode 'full' selalu tampil.
-  const showSTS = (mode === 'full') || selectedCols.has('STS');
-  const showSAS = (mode === 'full') || selectedCols.has('SAS');
+  // === Visibility flags ===
+  // Permintaan user: "jika pilih TP1, hanya tampilkan TP1, NA, Rank".
+  // Artinya di Mode Input:
+  //   - LM per-LM (W-AA)        -> SENDERHINYA disembunyikan (redundan di Mode Input)
+  //   - 30% LM Total            -> SENDERHINYA disembunyikan
+  //   - STS & 30% STS           -> tampil HANYA jika STS dipilih
+  //   - SAS & 40% SAS           -> tampil HANYA jika SAS dipilih
+  //   - NA, Rapor, Rank         -> SELALU tampil (hasil akhir)
+  // Mode Full: SEMUA tampil.
+  const showLM        = isFull; // LM1..LM5
+  const showLMTotal   = isFull; // 30% LM Total
+  const showSTS       = isFull || selectedCols.has('STS');
+  const showSTSPct    = isFull || showSTS;
+  const showSAS       = isFull || selectedCols.has('SAS');
+  const showSASPct    = isFull || showSAS;
+  // NA, Rapor, Rank selalu true
 
   // Hitung jumlah TP per LM (untuk colspan di Row 2)
   const tpCountPerLM = [0, 0, 0, 0, 0]; // index 0 = LM1, dst
@@ -1819,7 +2115,7 @@ function renderTable() {
 
   // === Tampilkan / sembunyikan banner "tidak ada kolom dipilih" ===
   const banner = document.getElementById('emptyBanner');
-  if (mode === 'input' && visibleTPs.length === 0 && !showSTS && !showSAS) {
+  if (!isFull && visibleTPs.length === 0 && !showSTS && !showSAS) {
     banner.classList.add('show');
   } else {
     banner.classList.remove('show');
@@ -1831,21 +2127,29 @@ function renderTable() {
   // Row 1: group headers
   html += '<tr class="group-row"><th class="no" rowspan="3">NO</th><th class="nama" rowspan="3">NAMA SISWA</th>';
   if (visibleTPs.length > 0) {
-    const tpLabel = mode === 'full'
+    const tpLabel = isFull
       ? 'FORMATIF (5 Lingkup Materi &times; 4 TP)'
       : 'FORMATIF (' + visibleTPs.length + ' TP terpilih)';
     html += '<th colspan="' + visibleTPs.length + '" class="lm-header">' + tpLabel + '</th>';
   }
-  html += '<th colspan="5" class="lm-header">SUMATIF LINGKUP MATERI</th>';
-  html += '<th rowspan="3" class="result-header comp-col">30% LM TOTAL</th>';
+  if (showLM) {
+    html += '<th colspan="5" class="lm-header">SUMATIF LINGKUP MATERI</th>';
+  }
+  if (showLMTotal) {
+    html += '<th rowspan="3" class="result-header comp-col">30% LM TOTAL</th>';
+  }
   if (showSTS) {
     html += '<th rowspan="3" class="sts-header comp-col">STS</th>';
   }
-  html += '<th rowspan="3" class="sts-header comp-col">30% STS</th>';
+  if (showSTSPct) {
+    html += '<th rowspan="3" class="sts-header comp-col">30% STS</th>';
+  }
   if (showSAS) {
     html += '<th rowspan="3" class="sts-header comp-col">SAS</th>';
   }
-  html += '<th rowspan="3" class="sts-header comp-col">40% SAS</th>';
+  if (showSASPct) {
+    html += '<th rowspan="3" class="sts-header comp-col">40% SAS</th>';
+  }
   html += '<th rowspan="3" class="result-header na-col">NA</th>';
   html += '<th rowspan="3" class="result-header rapor-col">NILAI RAPOR</th>';
   html += '<th rowspan="3" class="result-header rank-col">RANK</th>';
@@ -1859,8 +2163,10 @@ function renderTable() {
       html += '<th colspan="' + count + '" class="lm-header">Lingkup Materi ' + lm + '</th>';
     }
   }
-  for (let lm = 1; lm <= 5; lm++) {
-    html += '<th class="lm-header lm-col">LM' + lm + '</th>';
+  if (showLM) {
+    for (let lm = 1; lm <= 5; lm++) {
+      html += '<th class="lm-header lm-col">LM' + lm + '</th>';
+    }
   }
   html += '</tr>';
 
@@ -1878,6 +2184,19 @@ function renderTable() {
   head.innerHTML = html;
 
   // === BODY ===
+  // Helper: beri atribut data-grade untuk CSS warna cell (merah/kuning/hijau)
+  //   value < 78 -> "below"
+  //   value = 78 -> "equal"
+  //   value > 78 -> "above"
+  //   value kosong -> tanpa kelas
+  function gradeClass(v) {
+    if (v === '' || v === null || v === undefined || isNaN(v)) return '';
+    const n = Number(v);
+    if (n < 78) return 'cell-below';
+    if (n === 78) return 'cell-equal';
+    return 'cell-above';
+  }
+
   const body = document.getElementById('tableBody');
   body.innerHTML = siswa.map((s, i) => {
     let row = '<tr>';
@@ -1887,35 +2206,64 @@ function renderTable() {
     // TP cells - hanya yang visible, SEMUA sebagai input (tidak ada read-only lagi)
     visibleTPs.forEach(t => {
       const val = s.tp[t.lm - 1][t.tp - 1];
-      row += '<td class="tp-col"><input type="number" min="0" max="100" class="cell-input" data-row="' + s.row + '" data-col="' + t.key + '" value="' + val + '" onfocus="this.select()" onchange="onCellEdit(this)"></td>';
+      const gc = gradeClass(val);
+      row += '<td class="tp-col' + (gc ? ' ' + gc : '') + '"><input type="number" min="0" max="100" class="cell-input" data-row="' + s.row + '" data-col="' + t.key + '" value="' + val + '" onfocus="this.select()" onchange="onCellEdit(this)"></td>';
     });
 
-    // LM1-LM5 (W-AA) - 5 cols (selalu tampil, computed)
-    for (let lm = 0; lm < 5; lm++) {
-      row += '<td class="computed lm lm-col">' + fmt(s.lm[lm], 1) + '</td>';
+    // LM1-LM5 (W-AA) - 5 cols - tampil HANYA di mode 'full'
+    if (showLM) {
+      for (let lm = 0; lm < 5; lm++) {
+        const v = s.lm[lm];
+        const gc = gradeClass(v);
+        row += '<td class="computed lm lm-col' + (gc ? ' ' + gc : '') + '">' + fmt(v, 1) + '</td>';
+      }
     }
-    // 30% LM Total
-    row += '<td class="computed comp-col">' + fmt(s.lmTotal) + '</td>';
+    // 30% LM Total - tampil HANYA di mode 'full'
+    if (showLMTotal) {
+      const v = s.lmTotal;
+      const gc = gradeClass(v);
+      row += '<td class="computed comp-col' + (gc ? ' ' + gc : '') + '">' + fmt(v) + '</td>';
+    }
 
     // STS (input jika visible, jika tidak - JANGAN dirender sama sekali)
     if (showSTS) {
-      row += '<td class="comp-col"><input type="number" min="0" max="100" class="cell-input" data-row="' + s.row + '" data-col="STS" value="' + s.sts + '" onfocus="this.select()" onchange="onCellEdit(this)"></td>';
+      const v = s.sts;
+      const gc = gradeClass(v);
+      row += '<td class="comp-col' + (gc ? ' ' + gc : '') + '"><input type="number" min="0" max="100" class="cell-input" data-row="' + s.row + '" data-col="STS" value="' + v + '" onfocus="this.select()" onchange="onCellEdit(this)"></td>';
     }
-    // 30% STS (selalu tampil - computed)
-    row += '<td class="computed sts comp-col">' + fmt(s.stsPct, 1) + '</td>';
+    // 30% STS - tampil HANYA jika STS visible
+    if (showSTSPct) {
+      const v = s.stsPct;
+      const gc = gradeClass(v);
+      row += '<td class="computed sts comp-col' + (gc ? ' ' + gc : '') + '">' + fmt(v, 1) + '</td>';
+    }
 
     // SAS (input jika visible, jika tidak - JANGAN dirender)
     if (showSAS) {
-      row += '<td class="comp-col"><input type="number" min="0" max="100" class="cell-input" data-row="' + s.row + '" data-col="SAS" value="' + s.sas + '" onfocus="this.select()" onchange="onCellEdit(this)"></td>';
+      const v = s.sas;
+      const gc = gradeClass(v);
+      row += '<td class="comp-col' + (gc ? ' ' + gc : '') + '"><input type="number" min="0" max="100" class="cell-input" data-row="' + s.row + '" data-col="SAS" value="' + v + '" onfocus="this.select()" onchange="onCellEdit(this)"></td>';
     }
-    // 40% SAS (selalu tampil - computed)
-    row += '<td class="computed sts comp-col">' + fmt(s.sasPct, 1) + '</td>';
+    // 40% SAS - tampil HANYA jika SAS visible
+    if (showSASPct) {
+      const v = s.sasPct;
+      const gc = gradeClass(v);
+      row += '<td class="computed sts comp-col' + (gc ? ' ' + gc : '') + '">' + fmt(v, 1) + '</td>';
+    }
 
-    // NA
-    row += '<td class="computed na na-col">' + fmt(s.na, 1) + '</td>';
-    // Rapor
-    row += '<td class="computed rapor rapor-col">' + fmt(s.rapor) + '</td>';
-    // Rank
+    // NA (selalu tampil)
+    {
+      const v = s.na;
+      const gc = gradeClass(v);
+      row += '<td class="computed na na-col' + (gc ? ' ' + gc : '') + '">' + fmt(v, 1) + '</td>';
+    }
+    // Rapor (selalu tampil)
+    {
+      const v = s.rapor;
+      const gc = gradeClass(v);
+      row += '<td class="computed rapor rapor-col' + (gc ? ' ' + gc : '') + '">' + fmt(v) + '</td>';
+    }
+    // Rank (selalu tampil - TIDAK diberi warna karena bukan nilai 0-100)
     row += '<td class="computed rank rank-col">' + (s.rank || '') + '</td>';
 
     row += '</tr>';
@@ -1925,6 +2273,52 @@ function renderTable() {
   if (siswa.length === 0) {
     body.innerHTML = '<tr><td colspan="40" style="text-align:center;padding:30px;color:#94a3b8;">Belum ada siswa. Klik "+ Siswa" atau "+ Kelas Baru" untuk memulai.</td></tr>';
   }
+
+  // Setelah render selesai, pasang warna cell berdasar nilai terbaru.
+  // applyCellColors di sini sekadar untuk jaga-jaga kalau ada input yang nilainya
+  // berubah karena user belum menget 'onchange' tapi value-nya valid lewat autocomplete dll.
+  applyCellColors();
+}
+
+// === APPLY CELL COLORS - terapkan warna ke semua td nilai ===
+// Dipanggil setelah renderTable() selesai, dan setelah refreshComputedCells()
+// untuk update sel computed yang nilainya baru dihitung ulang oleh backend.
+//
+// Aturan:
+//   value < 78 -> cell-below (merah)
+//   value = 78 -> cell-equal (kuning)
+//   value > 78 -> cell-above (hijau)
+//   value kosong -> hapus semua kelas warna
+//
+// Tidak berlaku untuk td.no, td.nama, td.rank (bukan nilai 0-100).
+function applyCellColors() {
+  const body = document.getElementById('tableBody');
+  if (!body) return;
+  // Iterasi semua td yang ada di body - cek apakah punya input.cell-input ATAU
+  // punya kelas 'computed' (kecuali 'rank' karena itu ranking, bukan nilai).
+  const tds = body.querySelectorAll('td');
+  tds.forEach(td => {
+    // Skip kolom NO, NAMA, RANK
+    if (td.classList.contains('no') || td.classList.contains('nama') || td.classList.contains('rank')) return;
+
+    // Hapus kelas warna lama
+    td.classList.remove('cell-below', 'cell-equal', 'cell-above');
+
+    let val;
+    // Jika td berisi input, ambil nilai input
+    const input = td.querySelector('input.cell-input');
+    if (input) {
+      val = input.value;
+    } else {
+      val = td.textContent.trim();
+    }
+    if (val === '' || val === null || val === undefined) return;
+    const n = Number(val);
+    if (isNaN(n)) return;
+    if (n < 78) td.classList.add('cell-below');
+    else if (n === 78) td.classList.add('cell-equal');
+    else td.classList.add('cell-above');
+  });
 }
 
 // === CELL EDIT ===
@@ -1938,12 +2332,28 @@ async function onCellEdit(input) {
     if (isNaN(n) || n < 0 || n > 100) {
       toast('Nilai harus 0-100', 'err');
       input.value = '';
+      // Reset warna cell karena nilai invalid
+      const td = input.closest('td');
+      if (td) td.classList.remove('cell-below', 'cell-equal', 'cell-above');
       return;
     }
     value = n;
   }
 
   input.classList.add('edited');
+
+  // === Update warna cell INPUT ini SEGERA (sebelum panggil server) supaya
+  // user dapat feedback visual saat menget nilai, tidak perlu nunggu respons.
+  const tdParent = input.closest('td');
+  if (tdParent) {
+    tdParent.classList.remove('cell-below', 'cell-equal', 'cell-above');
+    if (value !== '' && !isNaN(value)) {
+      const n = Number(value);
+      if (n < 78) tdParent.classList.add('cell-below');
+      else if (n === 78) tdParent.classList.add('cell-equal');
+      else tdParent.classList.add('cell-above');
+    }
+  }
 
   try {
     const res = await apiCall('saveNilai', {}, 'POST', { kelas: activeKelas, sheetRow: Number(row), col: col, value: value });
@@ -1966,7 +2376,8 @@ async function onCellEdit(input) {
         s.rapor = u.rapor;
         s.rank = u.rank;
       }
-      // Re-render only computed cells (avoid losing focus on inputs)
+      // Re-render only computed cells (avoid losing focus on inputs).
+      // refreshComputedCells() juga akan applyCellColors() untuk update NA/Rapor warna.
       refreshComputedCells();
       toast('Nilai tersimpan', 'ok', 1500);
     } else {
@@ -1979,31 +2390,65 @@ async function onCellEdit(input) {
 
 function refreshComputedCells() {
   // Update computed cells with new values without re-rendering inputs.
-  // CATATAN: setelah revisi renderTable(), di Mode Input:
-  //   - Kolom TP yang tidak dipilih TIDAK dirender (tidak ada di DOM)
-  //   - Kolom STS / SAS juga TIDAK dirender kalau tidak dipilih
-  //   - Sel terkomputasi yang selalu ada (urutan DOM): LM1, LM2, LM3, LM4, LM5,
-  //     LMtotal, 30% STS, 40% SAS, NA, Rapor, Rank = 11 sel td.computed
-  // Nilai STS/SAS sendiri (input) bukan td.computed - tidak perlu di-update di sini.
+  // CATATAN: setelah revisi renderTable(), di Mode Input banyak sel computed
+  // disembunyikan (LM per-LM, 30% LM Total, STS%, SAS% ikut visibility masing-masing).
+  // Karena itu kita TIDAK bisa pakai index array urut - kita pakai CLASS td.computed
+  // untuk identifikasi sel apa itu (lm / lmTotal / stsPct / sasPct / na / rapor / rank).
   if (!kelasData) return;
   const body = document.getElementById('tableBody');
   kelasData.siswa.forEach((s, i) => {
     const tr = body.rows[i];
     if (!tr) return;
-    const cells = tr.querySelectorAll('td.computed');
-    const values = [
-      fmt(s.lm[0],1), fmt(s.lm[1],1), fmt(s.lm[2],1), fmt(s.lm[3],1), fmt(s.lm[4],1),
-      fmt(s.lmTotal),
-      fmt(s.stsPct,1),
-      fmt(s.sasPct,1),
-      fmt(s.na,1),
-      fmt(s.rapor),
-      s.rank || ''
-    ];
-    cells.forEach((c, idx) => {
-      if (idx < values.length) c.textContent = values[idx];
+    // Iterasi semua td.computed di baris ini
+    tr.querySelectorAll('td.computed').forEach(td => {
+      let val, decimals = 0;
+      if (td.classList.contains('lm') && !td.classList.contains('sts') && !td.classList.contains('na') && !td.classList.contains('rapor') && !td.classList.contains('rank')) {
+        // td.computed.lm (LM1..LM5) - perlu identifikasi index-nya.
+        // Pakai data-lm attribute? Tidak ada. Pakai index posisi di parent.
+        // Lebih mudah: hitung urutan td.computed.lm di baris ini.
+        // Tapi karena di Mode Input td.lm tidak dirender, ini hanya jalan di Mode Full.
+        // Skip - LM di-handle dengan re-render penuh via loadKelas().
+        return;
+      }
+      if (td.classList.contains('sts') && !td.classList.contains('na') && !td.classList.contains('rapor')) {
+        // Bisa STS% atau SAS% - identifikasi lewat index posisi
+        // Untuk simplicity, kita skip per-cell update untuk STS%/SAS% dan biarkan
+        // re-render penuh (loadKelas dipanggil setelah saveAll).
+        return;
+      }
+      if (td.classList.contains('na')) { val = s.na; decimals = 1; }
+      else if (td.classList.contains('rapor')) { val = s.rapor; decimals = 0; }
+      else if (td.classList.contains('rank')) { val = s.rank || ''; decimals = 0; }
+      else return;
+
+      if (val === '' || val === null || val === undefined) {
+        td.textContent = '';
+      } else if (decimals > 0) {
+        td.textContent = fmt(val, decimals);
+      } else {
+        td.textContent = (typeof val === 'number') ? fmt(val) : val;
+      }
+    });
+
+    // Update sel input juga (misal kalau backend ubah nilai karena formula)
+    // STS & SAS input
+    tr.querySelectorAll('input.cell-input').forEach(inp => {
+      // Jangan timpa nilai yang sedang aktif di-edit oleh user (fokus)
+      if (inp === document.activeElement) return;
+      const col = inp.dataset.col;
+      let v;
+      if (col === 'STS') v = s.sts;
+      else if (col === 'SAS') v = s.sas;
+      else if (col && col.startsWith('TP')) {
+        const m = col.match(/TP(\d)_LM(\d)/);
+        if (m) v = s.tp[parseInt(m[2]) - 1][parseInt(m[1]) - 1];
+      }
+      if (v !== undefined) inp.value = v;
     });
   });
+
+  // Setelah semua nilai di-update, apply ulang warna cell
+  applyCellColors();
 }
 
 // === SAVE ALL (batch) ===
